@@ -1,0 +1,46 @@
+{
+  "name": "liangjiewis-bulk-apikey",
+  "version": "1.0.0",
+  "description": "Bulk API keys for liangjiewis.com — free tier: none (sign-up grants 0 credit; 97 models listed — claude-opus-5, gpt-5.5, gemini-3-pro-preview, o3). One account per key; mint any number.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "liangjiewis-bulk-apikey": "cli.js",
+    "liangjiewis-bulk-apikey-launcher": "launcher.js"
+  },
+  "main": "cli.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node launcher.js",
+    "mint": "node cli.js"
+  },
+  "keywords": [
+    "api-key",
+    "bulk",
+    "register",
+    "launcher",
+    "liangjiewis",
+    "bulk",
+    "apikey"
+  ],
+  "files": [
+    "cdp.js",
+    "chrome-flags.js",
+    "cli.js",
+    "emailnator.js",
+    "imap.js",
+    "launcher.js",
+    "lib.js",
+    "mailbox-imap.js",
+    "mint-newapi-pinned.js",
+    "mint.js",
+    "newapi.js",
+    "provider-cli.js",
+    "proxy.js",
+    "verify.js",
+    "README.md",
+    "LICENSE"
+  ]
+}

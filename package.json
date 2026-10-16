@@ -1,7 +1,7 @@
 {
   "name": "liangjiewis-bulk-apikey",
   "version": "1.0.0",
-  "description": "Bulk API keys for liangjiewis.com — free tier: none (sign-up grants 0 credit; 97 models listed — claude-opus-5, gpt-5.5, gemini-3-pro-preview, o3). One account per key; mint any number.",
+  "description": "Bulk-create liangjiewis.com accounts with auto-generated API keys — OpenAI-compatible inference + 9Router connector.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
@@ -22,8 +22,9 @@
     "register",
     "launcher",
     "liangjiewis",
-    "bulk",
-    "apikey"
+    "apikey",
+    "9router",
+    "openai-compatible"
   ],
   "files": [
     "cdp.js",
@@ -40,6 +41,7 @@
     "provider-cli.js",
     "proxy.js",
     "verify.js",
+    "connect-9router.js",
     "README.md",
     "LICENSE"
   ]

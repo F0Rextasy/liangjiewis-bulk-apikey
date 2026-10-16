@@ -11,15 +11,15 @@
 
 # liangjiewis-bulk-apikey
 
-**Bulk API keys for [liangjiewis.com](https://liangjiewis.com) (量界智算) — 97 models listed, one account per key. Every key is verified live — `GET /v1/models` 200 on an exit other than the mint's — before it lands in `keys.txt`; the keys are real, and inference is gated by the account's credit (read the note below).**
+**Bulk-create [liangjiewis.com](https://liangjiewis.com) accounts with auto-generated API keys — OpenAI-compatible inference + 9Router connector.**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-blue?style=for-the-badge)](#)
 [![License](https://img.shields.io/badge/license-MIT-6ea8fe?style=for-the-badge)](LICENSE)
 [![Models](https://img.shields.io/badge/models-97%20listed-d97706?style=for-the-badge)](https://liangjiewis.com)
-[![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
+[![9Router](https://img.shields.io/badge/9Router-connector-8B5CF6?style=for-the-badge)](#-connect-to-9router)
 
-[🛠 Quick start](#-quick-start) · [✅ Verified](#-verified-authentic--credit-gated) · [🤖 Models & free tier](#-models--free-tier) · [⚙️ Options](#️-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
+[🛠 Quick start](#-quick-start) · [✅ Verified](#-verified-authentic--credit-gated) · [🤖 Models & free tier](#-models--free-tier) · [⚙️ Options](#️-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🔌 9Router](#-connect-to-9router) · [🐞 Issues](#-issues)
 
 </div>
 
@@ -57,7 +57,7 @@
 ## 🛠 Quick start
 
 ```bash
-git clone https://github.com/F0Rextasy/liangjiewis-bulk-apikey.git
+# clone or fork this repository, then:
 cd liangjiewis-bulk-apikey
 
 # 1) your proxy list, one exit per line (http://, socks5://, socks4:// or bare host:port)
@@ -145,6 +145,7 @@ is per account: N keys = N accounts, each with its own budget.
 | `mint.js` | `--count N` (3) · `--pool FILE` (`proxies.txt`) · `--mail emailnator\|imap` · `--imap-user` / `--imap-pass` (or `IMAP_USER` / `IMAP_PASS`) · `--mail-address` · `--sender REGEX` (default: the panel's own mail sender; `--sender none` accepts any) · `--model ID` · `--poll-ms` (2000) · `--code-wait` (300000) · `--max-cycle` (3) · `--scan` (200) · `--scan-conc` (8, max 8) · `--budget` (2400 s) · `--base URL` |
 | `verify.js` | `--key K` · `--all` · `--model ID` · `--max-tokens` (8) · `--want` (3) · `--pool FILE` · `--base URL` |
 | `launcher.js` | interactive: mint / verify / settings — `count` (keys per run) and `conc` (parallel exit probes) persist in `launcher.config.json` |
+| `--connect-9router` | on `mint`/`verify`: after it finishes, registers every key in `keys.txt` into a running 9Router (`node connect-9router.js --help`) |
 
 `--count` controls how many keys one run produces; the credit is per account, so N keys are
 N accounts. `--scan` / `--scan-conc` control how much of your exit list is probed per
@@ -171,6 +172,41 @@ dead.
 * The batch was measured against `https://liangjiewis.com`; `--base URL` points the tools
   at another host should the panel move.
 
+## 🔌 Connect to 9Router
+
+[9Router](https://9router.com) is a self-hosted, OpenAI-compatible router. liangjiewis.com serves
+an OpenAI-compatible endpoint (`https://liangjiewis.com/v1`), so register it once and every key you
+minted becomes a connection under one provider-node — 9Router load-balances across them:
+
+```bash
+node connect-9router.js \
+  --base http://localhost:20128 --password 123456 \
+  --api-key sk-xxxxxxxx
+```
+
+Run it without `--api-key` to register **every** key in `keys.txt`. Re-running is idempotent: the
+node is matched by `--prefix liangjiewis`, each connection is matched by name (`liangjiewis-001`,
+`liangjiewis-002`, …), and an already-registered key is left alone. Defaults:
+`--base http://localhost:20128`, `--password 123456`, `--name "liangjiewis.com"`,
+`--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`,
+`--model claude-3-5-haiku-20241022`.
+
+Inside 9Router the keys are served as:
+
+```
+liangjiewis/claude-3-5-haiku-20241022
+liangjiewis/claude-opus-5
+liangjiewis/gpt-5.5
+```
+
+Registering a key is free and touches no account — but **inference still needs credit on the
+account**, exactly as the note above says: a key in 9Router answers `403 insufficient_user_quota`
+until the account it belongs to is funded. 9Router reports the upstream refusal verbatim, so the
+credit state stays visible there.
+
+`node cli.js mint --count 3 --connect-9router` mints and registers in one pass, and
+`node launcher.js` drives the same flow from its menu.
+
 ## 🐞 Issues
 
 Open an issue with the failing step and the run log tail (`out/pinned-<date>.log`, or
@@ -185,6 +221,6 @@ MIT — see [LICENSE](LICENSE). Use it on accounts you are allowed to create.
 
 <div align="center">
 
-**Built by F0REXTASY** · [github.com/F0Rextasy](https://github.com/F0Rextasy) · [x.com/bigbullapp](https://x.com/bigbullapp)
+**[MIT](LICENSE) © 2026 liangjiewis-bulk-apikey contributors**
 
 </div>

@@ -1,1 +1,70 @@
-const a0_0x9f835e=a0_0x40db;function a0_0x40db(_0x215aa6,_0x45256e){_0x215aa6=_0x215aa6-0x186;const _0x3cf29e=a0_0x365d();let _0x2171e2=_0x3cf29e[_0x215aa6];if(a0_0x40db['CydLOz']===undefined){var _0x18d7c7=function(_0x4e9b15){const _0x153902='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x5de88a='',_0xd67f2c='',_0xd565d6=_0x5de88a+_0x18d7c7,_0x1e68c5=(''+function(){return 0x0;})['indexOf']('\x0a')!==-0x1;for(let _0x108edc=0x0,_0x229ef6,_0x2d7799,_0x30bf62=0x0;_0x2d7799=_0x4e9b15['charAt'](_0x30bf62++);~_0x2d7799&&(_0x229ef6=_0x108edc%0x4?_0x229ef6*0x40+_0x2d7799:_0x2d7799,_0x108edc++%0x4)?_0x5de88a+=_0x1e68c5||_0xd565d6['charCodeAt'](_0x30bf62+0xa)-0xa!==0x0?String['fromCharCode'](0xff&_0x229ef6>>(-0x2*_0x108edc&0x6)):_0x108edc:0x0){_0x2d7799=_0x153902['indexOf'](_0x2d7799);}for(let _0x5cfa6a=0x0,_0x1ff5df=_0x5de88a['length'];_0x5cfa6a<_0x1ff5df;_0x5cfa6a++){_0xd67f2c+='%'+('00'+_0x5de88a['charCodeAt'](_0x5cfa6a)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0xd67f2c);};a0_0x40db['qmhWcd']=_0x18d7c7,a0_0x40db['aOOfpM']={},a0_0x40db['CydLOz']=!![];}const _0x365dce=_0x3cf29e[0x0];a0_0x40db['AaAkWa']!==_0x365dce&&(a0_0x40db['aOOfpM']={},a0_0x40db['AaAkWa']=_0x365dce);const _0x40db86=a0_0x40db['aOOfpM'][_0x215aa6];if(_0x40db86===undefined){const _0x23596a=function(_0x2d1a18){this['pjmQQV']=_0x2d1a18,this['wAFJXw']=[0x1,0x0,0x0],this['ItaVBO']=function(){return'newState';},this['OkqdbD']='\x5c\x77\x2b\x20\x2a\x5c\x28\x5c\x29\x20\x2a\x7b\x5c\x77\x2b\x20\x2a',this['LEJNxM']='\x5b\x27\x7c\x22\x5d\x2e\x2b\x5b\x27\x7c\x22\x5d\x3b\x3f\x20\x2a\x7d';};_0x23596a['prototype']['ksAtxI']=function(){const _0x266ba0=new RegExp(this['OkqdbD']+this['LEJNxM']),_0x30ff97=_0x266ba0['test'](this['ItaVBO']['toString']())?--this['wAFJXw'][0x1]:--this['wAFJXw'][0x0];return this['vDbPcB'](_0x30ff97);},_0x23596a['prototype']['vDbPcB']=function(_0x44e14d){if(!Boolean(~_0x44e14d))return _0x44e14d;return this['lPqAzv'](this['pjmQQV']);},_0x23596a['prototype']['lPqAzv']=function(_0x1f3420){for(let _0x1be579=0x0,_0x52df29=this['wAFJXw']['length'];_0x1be579<_0x52df29;_0x1be579++){this['wAFJXw']['push'](Math['round'](Math['random']())),_0x52df29=this['wAFJXw']['length'];}return _0x1f3420(this['wAFJXw'][0x0]);},(''+function(){return 0x0;})['indexOf']('\x0a')===-0x1&&new _0x23596a(a0_0x40db)['ksAtxI'](),_0x2171e2=a0_0x40db['qmhWcd'](_0x2171e2),a0_0x40db['aOOfpM'][_0x215aa6]=_0x2171e2;}else _0x2171e2=_0x40db86;return _0x2171e2;}(function(_0x37aca8,_0x2972be){const _0x256304=a0_0x40db,_0x1cf7ae=_0x37aca8();while(!![]){try{const _0x25b976=parseInt(_0x256304(0x1a2))/0x1+-parseInt(_0x256304(0x191))/0x2+parseInt(_0x256304(0x18e))/0x3*(-parseInt(_0x256304(0x19c))/0x4)+-parseInt(_0x256304(0x196))/0x5+-parseInt(_0x256304(0x192))/0x6*(-parseInt(_0x256304(0x195))/0x7)+parseInt(_0x256304(0x1a4))/0x8+parseInt(_0x256304(0x198))/0x9;if(_0x25b976===_0x2972be)break;else _0x1cf7ae['push'](_0x1cf7ae['shift']());}catch(_0x3a767b){_0x1cf7ae['push'](_0x1cf7ae['shift']());}}}(a0_0x365d,0xd7590));const a0_0x18d7c7=(function(){let _0x108edc=!![];return function(_0x229ef6,_0x2d7799){const _0x30bf62=_0x108edc?function(){const _0x3a13bc=a0_0x40db;if(_0x2d7799){const _0x5cfa6a=_0x2d7799[_0x3a13bc(0x199)](_0x229ef6,arguments);return _0x2d7799=null,_0x5cfa6a;}}:function(){};return _0x108edc=![],_0x30bf62;};}()),a0_0x2171e2=a0_0x18d7c7(this,function(){const _0x3289e1=a0_0x40db;if(a0_0x2171e2['bind']()[_0x3289e1(0x186)]()['indexOf']('\x0a')!==-0x1)return;return a0_0x2171e2[_0x3289e1(0x186)]()[_0x3289e1(0x1a3)](_0x3289e1(0x1a0))['toString']()[_0x3289e1(0x19a)](a0_0x2171e2)['search'](_0x3289e1(0x1a0));});a0_0x2171e2();function a0_0x365d(){const _0x47849e=['mJiYnduYmgDfBKTvvq','Cg9YDa','nZmZndi4zMXlDLn2','yxbWBhK','y29UC3rYDwn0B3i','ChjVEhK','ntjPqu9LDem','twfPBgjVEeLTyxaGBMvLzhmGsu1buf9vu0vsigfUzcbjtufqx1bbu1mGkg9Yic0TAw1HCc11C2vYlY0TAw1HCc1WyxnZkq','Bg9N','zxHWB3j0CW','kcGOlISPkYKRksSK','D2fPDezVCKnVzguGBMvLzhmGDgHLigfSAwfZihrVihnLyxjJAcbMB3i','nZK4mZu2vKT1zfj0','C2vHCMnO','mtmYnJi4mtz0B3nNq2K','y2XVC2u','CMfUzg9T','kgLTyxaG4Ocuig5VDcb1C2vKigj5ihrOzsbTywLSyM94kq','Dg9tDhjPBMC','CgfZC3DVCMq','CMvWBgfJzq','D2fPDezVCKnVzgu','C2XPy2u','C3bSAxq','lI9PBwfW','DxnLCG','mJq1otyXAKXOsLHs','k3jI','Aw1HCa','mta5nti5mgjiyKfQvW','oda1ndG4AMzirLz4','zg9TywLU','Ag9ZDa','mJfhsgzhsK0'];a0_0x365d=function(){return _0x47849e;};return a0_0x365d();}'use strict';const {Imap}=require(a0_0x9f835e(0x18c));class MailboxImap{constructor({user:_0x1ff5df,password:_0x23596a,host:host='imap.gmail.com',port:port=0x3e1,domain:_0x2d1a18,proxy:proxy=null,log:_0x266ba0}={}){const _0xeb831b=a0_0x9f835e;if(!_0x1ff5df||!_0x23596a)throw new Error(_0xeb831b(0x19d));this[_0xeb831b(0x18d)]=_0x1ff5df,this[_0xeb831b(0x187)]=_0x23596a,this['host']=host,this[_0xeb831b(0x197)]=port,this[_0xeb831b(0x193)]=_0x2d1a18||_0x1ff5df[_0xeb831b(0x18b)]('@')[0x1];if(!this[_0xeb831b(0x193)])throw new Error('cannot\x20derive\x20a\x20domain\x20from\x20IMAP\x20user\x20'+_0x1ff5df);this[_0xeb831b(0x19b)]=proxy,this[_0xeb831b(0x19e)]=_0x266ba0||(()=>{}),this['imap']=null;}async['createAccount']({address:_0x30ff97}={}){const _0xe83569=a0_0x9f835e,_0x44e14d=this[_0xe83569(0x18d)][_0xe83569(0x18b)]('@')[0x0][_0xe83569(0x188)](/\+.*$/,''),_0x1f3420=Math[_0xe83569(0x1a6)]()[_0xe83569(0x186)](0x24)[_0xe83569(0x18a)](0x2,0x8);return{'address':_0x30ff97||_0x44e14d+_0xe83569(0x18f)+_0x1f3420+'@'+this['domain'],'password':_0xe83569(0x1a7),'alias':!![]};}async[a0_0x9f835e(0x189)]({address:_0x1be579,timeoutMs:timeoutMs=0x1d4c0,pollMs:pollMs=0xfa0}={}){const _0x33b291=a0_0x9f835e;if(!_0x1be579)throw new Error(_0x33b291(0x1a1));return!this[_0x33b291(0x190)]&&(this[_0x33b291(0x190)]=new Imap({'host':this[_0x33b291(0x194)],'port':this[_0x33b291(0x197)],'user':this[_0x33b291(0x18d)],'password':this['password'],'proxy':this['proxy'],'log':this['log']})),this['imap']['waitForCode']({'to':_0x1be579,'timeoutMs':timeoutMs,'pollMs':pollMs});}[a0_0x9f835e(0x1a5)](){const _0x403c75=a0_0x9f835e;if(this[_0x403c75(0x190)])this['imap'][_0x403c75(0x1a5)]();}}module[a0_0x9f835e(0x19f)]={'MailboxImap':MailboxImap};
+'use strict';
+
+/**
+ * Inbox backend for a real mailbox reached over IMAP — the counterpart to
+ * ./mailtm for providers that block disposable domains.
+ *
+ * The sign-up gate (measured 2026-10-13) accepts gmail.com and outlook.com and
+ * refuses mail.tm, mail.gw, guerrillamail, mailinator and maildrop. Those
+ * accepted providers have no free HTTP inbox API, so this backend uses IMAP plus
+ * an app password, and gives every account its own `local+tag@domain` alias —
+ * one address per account, all landing in the same mailbox.
+ *
+ * Same shape as MailTM, so provisionAccount() does not care which one it gets:
+ *   createAccount() -> {address, password}
+ *   waitForCode()   -> the 6-digit code
+ */
+
+const { Imap } = require('./imap');
+
+class MailboxImap {
+  /**
+   * @param {{user: string, password: string, host?: string, port?: number, domain?: string,
+   *          proxy?: object|null, log?: Function}} opts
+   */
+  constructor({ user, password, host = 'imap.gmail.com', port = 993, domain, proxy = null, log } = {}) {
+    if (!user || !password) throw new Error('MailboxImap needs IMAP_USER and IMAP_PASS (or --imap-user/--imap-pass)');
+    this.user = user;
+    this.password = password;
+    this.host = host;
+    this.port = port;
+    this.domain = domain || user.split('@')[1];
+    if (!this.domain) throw new Error(`cannot derive a domain from IMAP user ${user}`);
+    this.proxy = proxy;
+    this.log = log || (() => {});
+    this.imap = null;
+  }
+
+  /** One fresh alias per account; the mailbox itself is shared. */
+  async createAccount({ address } = {}) {
+    const local = this.user.split('@')[0].replace(/\+.*$/, '');
+    const tag = Math.random().toString(36).slice(2, 8);
+    return {
+      address: address || `${local}+rb${tag}@${this.domain}`,
+      password: '(imap — not used by the mailbox)',
+      alias: true,
+    };
+  }
+
+  /** Polls INBOX for the message addressed to this account's alias. */
+  async waitForCode({ address, timeoutMs = 120000, pollMs = 4000 } = {}) {
+    if (!address) throw new Error('waitForCode needs the alias to search for');
+    if (!this.imap) {
+      this.imap = new Imap({
+        host: this.host,
+        port: this.port,
+        user: this.user,
+        password: this.password,
+        proxy: this.proxy,
+        log: this.log,
+      });
+    }
+    return this.imap.waitForCode({ to: address, timeoutMs, pollMs });
+  }
+
+  close() {
+    if (this.imap) this.imap.close();
+  }
+}
+
+module.exports = { MailboxImap };

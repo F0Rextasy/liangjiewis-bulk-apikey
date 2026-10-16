@@ -11,12 +11,12 @@
  * or connection is reused), and 9Router load-balances across the keys of a node.
  *
  * Usage:
- *   node connect-9router.js \
+ *   node src/connect-9router.js \
  *     --base http://localhost:20128 --password 123456 \
  *     --api-key sk-xxxx [--name "liangjiewis.com"] [--prefix liangjiewis]
  *
- *   node connect-9router.js                  # register every key in keys.txt
- *   node connect-9router.js --model <id>     # pin the connection's default model
+ *   node src/connect-9router.js                  # register every key in keys.txt
+ *   node src/connect-9router.js --model <id>     # pin the connection's default model
  *
  * Options:
  *   --base <url>       9Router base URL         (default http://localhost:20128)
@@ -33,6 +33,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const ROOT = path.resolve(__dirname, '..'); // the checkout root: keys.txt lives here
 const UA = 'liangjiewis-bulk-9router-connector/1.0';
 
 const DEFAULTS = {
@@ -145,13 +146,13 @@ async function connect9Router(opts = {}) {
   return connection;
 }
 
-/** `keys.txt` beside this file, else one level up (the layout the tools run in). */
+/** `keys.txt` at the checkout root (the layout the README documents). */
 function defaultKeysFile() {
+  const atRoot = path.join(ROOT, 'keys.txt');
+  if (fs.existsSync(atRoot)) return atRoot;
   const beside = path.join(__dirname, 'keys.txt');
   if (fs.existsSync(beside)) return beside;
-  const up = path.join(__dirname, '..', 'keys.txt');
-  if (fs.existsSync(up)) return up;
-  return beside;
+  return atRoot;
 }
 
 function readKeys(keysFile = defaultKeysFile()) {

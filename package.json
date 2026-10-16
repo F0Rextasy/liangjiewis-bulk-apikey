@@ -5,16 +5,16 @@
   "license": "MIT",
   "type": "commonjs",
   "bin": {
-    "liangjiewis-bulk-apikey": "cli.js",
-    "liangjiewis-bulk-apikey-launcher": "launcher.js"
+    "liangjiewis-bulk-apikey": "src/cli.js",
+    "liangjiewis-bulk-apikey-launcher": "src/launcher.js"
   },
-  "main": "cli.js",
+  "main": "src/cli.js",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
-    "start": "node launcher.js",
-    "mint": "node cli.js"
+    "start": "node src/launcher.js",
+    "mint": "node src/cli.js"
   },
   "keywords": [
     "api-key",
@@ -27,21 +27,21 @@
     "openai-compatible"
   ],
   "files": [
-    "cdp.js",
-    "chrome-flags.js",
-    "cli.js",
-    "emailnator.js",
-    "imap.js",
-    "launcher.js",
-    "lib.js",
-    "mailbox-imap.js",
-    "mint-newapi-pinned.js",
-    "mint.js",
-    "newapi.js",
-    "provider-cli.js",
-    "proxy.js",
-    "verify.js",
-    "connect-9router.js",
+    "src/cdp.js",
+    "src/chrome-flags.js",
+    "src/cli.js",
+    "src/emailnator.js",
+    "src/imap.js",
+    "src/launcher.js",
+    "src/lib.js",
+    "src/mailbox-imap.js",
+    "src/mint-newapi-pinned.js",
+    "src/mint.js",
+    "src/newapi.js",
+    "src/provider-cli.js",
+    "src/proxy.js",
+    "src/verify.js",
+    "src/connect-9router.js",
     "README.md",
     "LICENSE"
   ]

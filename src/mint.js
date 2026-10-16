@@ -11,9 +11,9 @@
  * and points the two engine lookups that belong to a provider *folder* (its
  * temp-mail module and the folder `keys.txt` lives in) at this repository.
  *
- *   node mint.js                          # 3 keys, exits from proxies.txt
- *   node mint.js --count 10               # any number; accounts run one after another
- *   node mint.js --count 10 --scan-conc 8 # exits probed eight at a time
+ *   node src/mint.js                          # 3 keys, exits from proxies.txt
+ *   node src/mint.js --count 10               # any number; accounts run one after another
+ *   node src/mint.js --count 10 --scan-conc 8 # exits probed eight at a time
  *
  * A key is appended to `keys.txt` only after `GET /v1/models` answered 200 for it
  * and a model call came back (a completion, or a credit refusal — that is what a
@@ -26,7 +26,8 @@ const path = require('path');
 
 const BASE = 'https://liangjiewis.com';
 const TAG = 'ljw';
-const POOL = path.join(__dirname, 'proxies.txt');
+const ROOT = path.resolve(__dirname, '..'); // the checkout root: user-facing files (proxies.txt, keys.txt, out/…) live here
+const POOL = path.join(ROOT, 'proxies.txt');
 const DEFAULTS = { count: '3', 'poll-ms': '2000', 'code-wait': '300000', 'max-cycle': '3', scan: '200', 'scan-conc': '8', budget: '2400' };
 // The panel's verification mail has exactly one sender, and a shared mailbox is
 // full of other people's codes: a code is only submitted when the mail it came
@@ -36,7 +37,7 @@ const SENDER = '1449683658|量界智算';
 
 const USAGE = `liangjiewis-bulk-apikey · mint — one 量界智算 account per key
 
-usage: node mint.js [options]
+usage: node src/mint.js [options]
 
   --count N        keys to mint (default 3)
   --pool FILE      exit list, one per line (default proxies.txt)
@@ -85,7 +86,7 @@ if (!Number.isFinite(count) || count < 1) {
   console.error('--count takes a positive integer');
   process.exit(2);
 }
-const pool = path.resolve(one('pool') || POOL);
+const pool = path.resolve(ROOT, one('pool') || POOL);
 if (!fs.existsSync(pool)) {
   console.error(`no exit list at ${pool}\n  one exit per line, e.g. socks5://127.0.0.1:1080 — see README "Behind a proxy"`);
   process.exit(2);
@@ -98,12 +99,12 @@ if (!exits.length) {
 
 // ---- the engine's two provider-folder lookups, pointed at this repository ---
 //
-// 1) keys.txt, accounts.json, models.json and out/ live next to these tools, so
-//    the engine's "provider folder" is this repository root.
+// 1) keys.txt, accounts.json, models.json and out/ live at the checkout root (the
+//    code sits in src/), so the engine's "provider folder" is this repository root.
 const lib = require('./lib.js');
 lib.providerDir = () => {
-  fs.mkdirSync(path.join(__dirname, 'out'), { recursive: true });
-  return __dirname;
+  fs.mkdirSync(path.join(ROOT, 'out'), { recursive: true });
+  return ROOT;
 };
 
 // 2) the engine reads its temp-mail module from the `cloudflare-wai/` provider

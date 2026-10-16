@@ -4,9 +4,9 @@
 /**
  * Command dispatcher for liangjiewis-bulk-apikey.
  *
- *   node cli.js mint     create fresh accounts and mint one key each
- *   node cli.js verify   re-check keys that are already on disk
- *   node cli.js help
+ *   node src/cli.js mint     create fresh accounts and mint one key each
+ *   node src/cli.js verify   re-check keys that are already on disk
+ *   node src/cli.js help
  *
  * Every task spawns the matching module in this folder, so a crash in one run
  * never leaves state behind in this process.
@@ -25,15 +25,15 @@ const TASKS = {
 
 function help() {
   console.log('liangjiewis-bulk-apikey — One 量界智算 account per API key — 97 models listed, email-verified sign-up, every key live-checked\n');
-  console.log('usage: node cli.js <task> [options]\n');
+  console.log('usage: node src/cli.js <task> [options]\n');
   console.log('tasks:');
   for (const [name, t] of Object.entries(TASKS)) console.log('  ' + name.padEnd(9) + ' ' + t.note);
   console.log('\noptions: every task takes its own flags — ask it directly:');
-  console.log('  node <task-file> --help');
+  console.log('  node src/<task-file> --help');
   console.log('  --connect-9router    register the keys in keys.txt with 9Router after the task');
   console.log('\nproxy pool:');
   console.log('  one exit per line in proxies.txt — scheme://host:port[#comment], user:pass@ supported');
-  console.log('\nno options? run the interactive launcher:  node launcher.js');
+  console.log('\nno options? run the interactive launcher:  node src/launcher.js');
 }
 
 const args = process.argv.slice(2);

@@ -21,10 +21,10 @@
  *   account_banned the panel banned the account (`auth.user_banned`)
  *   error         no candidate exit answered — the key was never measured
  *
- *   node verify.js                 # every key on disk that is not already ok
- *   node verify.js --key <key>     # one key
- *   node verify.js --all           # also re-check keys whose last run said ok
- *   node verify.js --model claude-3-5-haiku-20241022
+ *   node src/verify.js                 # every key on disk that is not already ok
+ *   node src/verify.js --key <key>     # one key
+ *   node src/verify.js --all           # also re-check keys whose last run said ok
+ *   node src/verify.js --model claude-3-5-haiku-20241022
  *
  * Verdicts are written to `accounts.json` — the current verdict in `verify`
  * (`status`, `verdict`, `exit`, `at`), the measurement taken when the key was
@@ -41,15 +41,16 @@ const { Panel } = require('./newapi.js');
 
 const BASE = 'https://liangjiewis.com';
 const HOST = new URL(BASE).host;
-const POOL = path.join(__dirname, 'proxies.txt');
-const ACCOUNTS = path.join(__dirname, 'accounts.json');
-const KEYS = path.join(__dirname, 'keys.txt');
-const MODELS_FILE = path.join(__dirname, 'models.json');
-const OUT = path.join(__dirname, 'out');
+const ROOT = path.resolve(__dirname, '..'); // the checkout root: user-facing files live here
+const POOL = path.join(ROOT, 'proxies.txt');
+const ACCOUNTS = path.join(ROOT, 'accounts.json');
+const KEYS = path.join(ROOT, 'keys.txt');
+const MODELS_FILE = path.join(ROOT, 'models.json');
+const OUT = path.join(ROOT, 'out');
 
 const USAGE = `liangjiewis-bulk-apikey · verify — re-check keys already on disk
 
-usage: node verify.js [options]
+usage: node src/verify.js [options]
 
   --key K          verify one key instead of every key on disk
   --all            also re-check keys whose last run said they work
@@ -86,7 +87,7 @@ for (const a of argv) {
   }
 }
 
-const pool = path.resolve(one('pool') || POOL);
+const pool = path.resolve(ROOT, one('pool') || POOL);
 if (!fs.existsSync(pool)) {
   console.error(`no exit list at ${pool}\n  one exit per line, e.g. socks5://127.0.0.1:1080 — see README "Behind a proxy"`);
   process.exit(2);

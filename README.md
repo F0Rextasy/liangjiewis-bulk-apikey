@@ -11,7 +11,7 @@
 
 # liangjiewis-bulk-apikey
 
-**Bulk-create [liangjiewis.com](https://liangjiewis.com) accounts with auto-generated API keys — OpenAI-compatible inference + 9Router connector.**
+**Bulk-create [liangjiewis.com](https://liangjiewis.com) accounts with auto-generated API keys — OpenAI-compatible inference + [9Router](https://9router.com) connector.**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-blue?style=for-the-badge)](#)
@@ -64,13 +64,13 @@ cd liangjiewis-bulk-apikey
 printf 'socks5://127.0.0.1:1080\n' > proxies.txt
 
 # 2) go
-node launcher.js                         # interactive: mint / verify / settings
+node src/launcher.js                            # interactive: mint / verify / settings
 # or drive it directly:
-node cli.js mint --count 3               # any N; 3 is the sample default
-node cli.js mint --count 10 --scan-conc 8
-node cli.js verify                       # re-check every key in keys.txt
-node cli.js help                         # task list
-node mint.js --help                      # the flags mint actually reads
+node src/cli.js mint --count 3                  # any N; 3 is the sample default
+node src/cli.js mint --count 10 --scan-conc 8
+node src/cli.js verify                          # re-check every key in keys.txt
+node src/cli.js help                            # task list
+node src/mint.js --help                         # the flags mint actually reads
 ```
 
 Keys are appended to `keys.txt`, one per line, once a key has answered `GET /v1/models`
@@ -93,14 +93,14 @@ the same day:
 | `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 12:33 |
 
 **All three were live as this was written** — re-checked 2026-10-15 13:11 UTC with
-`verify.js` itself: **3/3 keys answered `GET /v1/models` 200** (97 models each, each on a
+`src/verify.js` itself: **3/3 keys answered `GET /v1/models` 200** (97 models each, each on a
 fresh exit — none the mint's), **3/3 out of credit** (`403 insufficient_user_quota`).
 None refused, none left unmeasured. The middle columns are the point: `/v1/models` 200
 proves a key is *authentic*, and the completion column shows exactly what a fresh account
 can *spend* — here, nothing until it is funded, and the tool records that state per key
 instead of guessing.
 
-`node cli.js verify` reproduces the check for your own file, and no key that fails
+`node src/cli.js verify` reproduces the check for your own file, and no key that fails
 verification is ever written. A key is never committed — `keys.txt` is git-ignored and is
 where your own keys land.
 
@@ -142,16 +142,16 @@ is per account: N keys = N accounts, each with its own budget.
 
 | tool | flags |
 |---|---|
-| `mint.js` | `--count N` (3) · `--pool FILE` (`proxies.txt`) · `--mail emailnator\|imap` · `--imap-user` / `--imap-pass` (or `IMAP_USER` / `IMAP_PASS`) · `--mail-address` · `--sender REGEX` (default: the panel's own mail sender; `--sender none` accepts any) · `--model ID` · `--poll-ms` (2000) · `--code-wait` (300000) · `--max-cycle` (3) · `--scan` (200) · `--scan-conc` (8, max 8) · `--budget` (2400 s) · `--base URL` |
-| `verify.js` | `--key K` · `--all` · `--model ID` · `--max-tokens` (8) · `--want` (3) · `--pool FILE` · `--base URL` |
-| `launcher.js` | interactive: mint / verify / settings — `count` (keys per run) and `conc` (parallel exit probes) persist in `launcher.config.json` |
-| `--connect-9router` | on `mint`/`verify`: after it finishes, registers every key in `keys.txt` into a running 9Router (`node connect-9router.js --help`) |
+| `src/mint.js` | `--count N` (3) · `--pool FILE` (`proxies.txt`) · `--mail emailnator\|imap` · `--imap-user` / `--imap-pass` (or `IMAP_USER` / `IMAP_PASS`) · `--mail-address` · `--sender REGEX` (default: the panel's own mail sender; `--sender none` accepts any) · `--model ID` · `--poll-ms` (2000) · `--code-wait` (300000) · `--max-cycle` (3) · `--scan` (200) · `--scan-conc` (8, max 8) · `--budget` (2400 s) · `--base URL` |
+| `src/verify.js` | `--key K` · `--all` · `--model ID` · `--max-tokens` (8) · `--want` (3) · `--pool FILE` · `--base URL` |
+| `src/launcher.js` | interactive: mint / verify / settings — `count` (keys per run) and `conc` (parallel exit probes) persist in `launcher.config.json` |
+| `--connect-9router` | on `mint`/`verify`: after it finishes, registers every key in `keys.txt` into a running 9Router (`node src/connect-9router.js --help`) |
 
 `--count` controls how many keys one run produces; the credit is per account, so N keys are
 N accounts. `--scan` / `--scan-conc` control how much of your exit list is probed per
 pinned exit — raise `--scan` on a stale list, lower it on a small one.
 
-`verify.js` writes its verdicts to `accounts.json` — the current one under `verify`
+`src/verify.js` writes its verdicts to `accounts.json` — the current one under `verify`
 (`status`, `verdict`, `exit`, `at`), the measurement taken when the key was minted kept
 under `verify.atMint` — so "the key works" is never confused with "this session works",
 and a key no exit could be measured on says `error` (unmeasured) instead of reading as
@@ -179,7 +179,7 @@ an OpenAI-compatible endpoint (`https://liangjiewis.com/v1`), so register it onc
 minted becomes a connection under one provider-node — 9Router load-balances across them:
 
 ```bash
-node connect-9router.js \
+node src/connect-9router.js \
   --base http://localhost:20128 --password 123456 \
   --api-key sk-xxxxxxxx
 ```
@@ -204,8 +204,8 @@ account**, exactly as the note above says: a key in 9Router answers `403 insuffi
 until the account it belongs to is funded. 9Router reports the upstream refusal verbatim, so the
 credit state stays visible there.
 
-`node cli.js mint --count 3 --connect-9router` mints and registers in one pass, and
-`node launcher.js` drives the same flow from its menu.
+`node src/cli.js mint --count 3 --connect-9router` mints and registers in one pass, and
+`node src/launcher.js` drives the same flow from its menu.
 
 ## 🐞 Issues
 

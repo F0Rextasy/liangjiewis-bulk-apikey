@@ -3,7 +3,7 @@
 
 /**
  * Interactive launcher for liangjiewis-bulk-apikey — a menu over the task modules.
- * Settings persist in launcher.config.json next to this file.
+ * Settings persist in launcher.config.json at the checkout root.
  */
 
 const fs = require('fs');
@@ -11,10 +11,11 @@ const path = require('path');
 const readline = require('readline');
 const { spawnSync } = require('child_process');
 
-const HERE = __dirname;
-const CONFIG = path.join(HERE, 'launcher.config.json');
-const POOL = path.join(HERE, 'proxies.txt');
-const KEYS = path.join(HERE, 'keys.txt');
+const HERE = __dirname; // the src/ folder — the task modules spawn from here
+const ROOT = path.resolve(__dirname, '..'); // the checkout root: user-facing files live here
+const CONFIG = path.join(ROOT, 'launcher.config.json');
+const POOL = path.join(ROOT, 'proxies.txt');
+const KEYS = path.join(ROOT, 'keys.txt');
 
 const defaults = { count: 3, conc: 8 };
 let cfg = { ...defaults };
@@ -53,7 +54,7 @@ function banner() {
 const count = (f) => { try { return fs.readFileSync(f, 'utf8').split(/\r?\n/).filter((l) => l.trim() && !l.trim().startsWith('#')).length; } catch (e) { return 0; } };
 
 function run(args) {
-  console.log('\n▶ node ' + args.join(' ') + '\n');
+  console.log('\n▶ node src/' + args.join(' ') + '\n');
   const r = spawnSync(process.execPath, args, { windowsHide: true, cwd: HERE, stdio: 'inherit' });
   if (r.status !== 0) console.log('\n⚠ exited with code ' + r.status);
 }

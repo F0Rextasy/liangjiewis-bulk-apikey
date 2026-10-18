@@ -55,6 +55,9 @@ usage: node src/mint.js [options]
   --max-cycle N    cycles per account — a dead exit is retried on a fresh one (default 3)
   --budget N       wall-clock ceiling in seconds for the whole run (default 2400)
   --base URL       panel address (default ${BASE})
+  --preset NAME    turbo (5 accounts at a time, 3 s apart) | balanced (4/6) | safe (2/8)
+  --conc N         accounts minted at a time (explicit flag wins over --preset)
+  --gap S          seconds between account starts inside a worker
   --help           this text
 
 Every request rides an exit from --pool, one exit pinned per account; a mailbox
@@ -72,9 +75,10 @@ if (has('help') || has('-h') || argv.includes('-h')) {
   process.exit(0);
 }
 
-const FLAGS = ['--count', '--pool', '--mail', '--imap-user', '--imap-pass', '--mail-address', '--base', '--model', '--sender', '--poll-ms', '--code-wait', '--max-cycle', '--scan', '--scan-conc', '--budget'];
+const FLAGS = ['--count', '--pool', '--mail', '--imap-user', '--imap-pass', '--mail-address', '--base', '--model', '--sender', '--preset', '--conc', '--gap', '--poll-ms', '--code-wait', '--max-cycle', '--scan', '--scan-conc', '--budget'];
 for (const a of argv) {
-  if (a.startsWith('-') && !FLAGS.includes(a)) {
+  // `--preset=turbo` (and the same form for --conc/--gap) is accepted too.
+  if (a.startsWith('-') && !FLAGS.includes(a) && !['--preset', '--conc', '--gap'].includes(a.split('=')[0])) {
     console.error(`unknown flag: ${a}\n`);
     console.log(USAGE);
     process.exit(2);
@@ -123,12 +127,34 @@ Module._resolveFilename = function (request, ...rest) {
 const senderArg = one('sender');
 const sender = senderArg === null ? SENDER : /^none$/i.test(senderArg) ? '' : senderArg;
 
-const passthrough = ['--mail', '--imap-user', '--imap-pass', '--mail-address', '--model', '--poll-ms', '--code-wait', '--max-cycle', '--scan', '--scan-conc', '--budget'];
+const passthrough = ['--mail', '--imap-user', '--imap-pass', '--mail-address', '--model', '--preset', '--conc', '--gap', '--poll-ms', '--code-wait', '--max-cycle', '--scan', '--scan-conc', '--budget'];
 const forwarded = [];
 for (const flag of passthrough) {
   const v = one(flag);
   if (v) forwarded.push(flag, v);
 }
+
+const { presetArgv, resolvePreset } = require('./preset');
+// Run shape (operator standard v3): `--preset` picks workers + pace, an explicit
+// --conc/--gap wins, and with neither the engine keeps its serial default. Both
+// `--preset turbo` and `--preset=turbo` are accepted for these three flags.
+const eq = (n) => {
+  const h = argv.find((a) => a.startsWith(`--${n}=`));
+  return h ? h.slice(n.length + 3) : null;
+};
+const shapeArg = (n) => (one(n) != null ? one(n) : eq(n));
+const PRESET = presetArgv(argv) || shapeArg('preset');
+const SHAPE = resolvePreset({
+  preset: PRESET,
+  conc: shapeArg('conc') ? parseInt(shapeArg('conc'), 10) : null,
+  gap: shapeArg('gap') ? parseInt(shapeArg('gap'), 10) : null,
+  defaultConc: 1,
+  defaultGap: 0,
+});
+const shapeArgv = [];
+if (PRESET) shapeArgv.push('--preset', PRESET);
+shapeArgv.push('--conc', String(SHAPE.conc));
+if (SHAPE.gap) shapeArgv.push('--gap', String(SHAPE.gap));
 
 process.argv = [
   process.argv[0],
@@ -148,11 +174,12 @@ process.argv = [
   ...(sender ? ['--sender', sender] : []),
   '--count',
   String(count),
+  ...shapeArgv,
   ...Object.entries(DEFAULTS)
     .filter(([k]) => k !== 'count' && !forwarded.includes(`--${k}`))
     .flatMap(([k, v]) => [`--${k}`, v]),
   ...forwarded,
 ];
 
-console.log(`liangjiewis · ${count} key(s) · exits ${exits.length} from ${path.basename(pool)} · keys land in keys.txt`);
+console.log(`liangjiewis · ${count} key(s) · ${SHAPE.name ? `${SHAPE.name} (conc ${SHAPE.conc}${SHAPE.gap ? `, gap ${SHAPE.gap}s` : ''})` : `conc ${SHAPE.conc}`} · exits ${exits.length} from ${path.basename(pool)} · keys land in keys.txt`);
 require(path.join(__dirname, 'mint-newapi-pinned.js'));

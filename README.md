@@ -24,6 +24,12 @@
 
 </div>
 
+<div align="center">
+
+**English** · [Türkçe](README.tr.md) · [中文](README.cn.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [Português](README.pt.md)
+
+</div>
+
 ---
 
 ## ✨ Why this exists
@@ -61,13 +67,7 @@ gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
 text-embedding-3-small
 ```
 
-**What a fresh account answers when it tries to *use* a model** — measured on every key, quoted so you know exactly what you will get:
-
-| Call | Status | Body |
-| --- | --- | --- |
-| `POST /v1/chat/completions` (`claude-3-5-haiku-20241022`, the cheapest listed id) | **403** | `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` |
-
-Top up the account and the same key serves traffic with no re-mint.
+**What a fresh account answers when it tries to *use* a model** — measured on every key: `POST /v1/chat/completions` answers `403` `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` — so no id has a chat-200 and the tick table stays empty. Top up the account and the same key serves traffic with no re-mint.
 
 ## 🧪 How to use the API
 
@@ -124,8 +124,6 @@ Measured **2026-10-15**: **3 accounts → 3 keys, one key per account**. Every k
 
 | Model | Live (models) | Real chat call | Measured |
 | --- | --- | --- | --- |
-| `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 09:41 |
-| `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 09:42 |
 | `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 12:33 |
 
 **All three were live as written** — re-checked 2026-10-15 13:11 UTC with `src/verify.js` itself: **3/3 keys answered `GET /v1/models` 200** (97 models each, each on a fresh exit — none the mint's), **3/3 out of credit** (`403 insufficient_user_quota`). `GET /v1/models` 200 proves a key is *authentic*; the completion column shows what a fresh account can *spend*. `node src/cli.js verify` reproduces the check for your own file.

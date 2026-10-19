@@ -30,6 +30,12 @@
 
 </div>
 
+
+
+
+
+
+
 ---
 
 ## ✨ Why this exists
@@ -67,7 +73,14 @@ gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
 text-embedding-3-small
 ```
 
-**What a fresh account answers when it tries to *use* a model** — measured on every key: `POST /v1/chat/completions` answers `403` `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` — so no id has a chat-200 and the tick table stays empty. Top up the account and the same key serves traffic with no re-mint.
+**What a fresh account answers when it tries to *use* a model** — measured on every key: `POST /v1/chat/completions` answers `403` `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` until the account is funded. A 2026-10-19 re-scan of the repository keys found **2 of 5 funded**: those keys answer `200` on the ids below, while every other catalogue id still returns the credit refusal. Top up the account and the same key serves traffic with no re-mint.
+
+|Model|✓|
+|---|---|
+|`claude-3-5-haiku-20241022`|✓|
+|`claude-3-5-sonnet-20240620`|✓|
+|`claude-haiku-4-5-20251001`|✓|
+|`claude-opus-4-1-20250805`|✓|
 
 ## 🧪 How to use the API
 

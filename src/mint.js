@@ -40,7 +40,7 @@ const USAGE = `liangjiewis-bulk-apikey · mint — one 量界智算 account per 
 usage: node src/mint.js [options]
 
   --count N        keys to mint (default 3)
-  --pool FILE      exit list, one per line (default proxies.txt)
+  --pool FILE      exit list, one per line (default proxies.txt), optional
   --mail MODE      emailnator (default) | imap  — imap needs --imap-user/--imap-pass
   --imap-user U    mailbox account for --mail imap (or IMAP_USER)
   --imap-pass P    mailbox password for --mail imap (or IMAP_PASS)
@@ -60,8 +60,11 @@ usage: node src/mint.js [options]
   --gap S          seconds between account starts inside a worker
   --help           this text
 
-Every request rides an exit from --pool, one exit pinned per account; a mailbox
-that cannot be reached through it is retried on the next line.`;
+One exit is pinned per account when a pool is provided, and a mailbox that cannot
+be reached through it is retried on the next line.
+
+Requests go through your proxy list when one is provided (--pool / env). Without
+a pool the tool connects directly.`;
 
 const argv = process.argv.slice(2);
 const has = (name) => argv.includes(`--${name}`);
@@ -91,14 +94,18 @@ if (!Number.isFinite(count) || count < 1) {
   process.exit(2);
 }
 const pool = path.resolve(ROOT, one('pool') || POOL);
-if (!fs.existsSync(pool)) {
-  console.error(`no exit list at ${pool}\n  one exit per line, e.g. socks5://127.0.0.1:1080 — see README "Behind a proxy"`);
-  process.exit(2);
-}
-const exits = fs.readFileSync(pool, 'utf8').split(/\r?\n/).filter((l) => l.trim() && !l.trim().startsWith('#'));
+const exits = (() => {
+  try {
+    return fs.readFileSync(pool, 'utf8').split(/\r?\n/).filter((l) => l.trim() && !l.trim().startsWith('#'));
+  } catch (e) {
+    return [];
+  }
+})();
 if (!exits.length) {
-  console.error(`${pool} has no exits in it yet (comment lines do not count)`);
-  process.exit(2);
+  // No pool = DIRECT mode: a proxy is recommended at scale (per-IP limits,
+  // bans), but the tool works without one. `null` is the direct sentinel the
+  // engine's loader hands to the request layer.
+  console.log(`no proxy list at ${pool} — running WITHOUT a proxy (direct). Put exits there (or pass --pool) to rotate per account.`);
 }
 
 // ---- the engine's two provider-folder lookups, pointed at this repository ---
@@ -181,5 +188,5 @@ process.argv = [
   ...forwarded,
 ];
 
-console.log(`liangjiewis · ${count} key(s) · ${SHAPE.name ? `${SHAPE.name} (conc ${SHAPE.conc}${SHAPE.gap ? `, gap ${SHAPE.gap}s` : ''})` : `conc ${SHAPE.conc}`} · exits ${exits.length} from ${path.basename(pool)} · keys land in keys.txt`);
+console.log(`liangjiewis · ${count} key(s) · ${SHAPE.name ? `${SHAPE.name} (conc ${SHAPE.conc}${SHAPE.gap ? `, gap ${SHAPE.gap}s` : ''})` : `conc ${SHAPE.conc}`} · exits ${exits.length || 'direct'}${exits.length ? ` from ${path.basename(pool)}` : ''} · keys land in keys.txt`);
 require(path.join(__dirname, 'mint-newapi-pinned.js'));

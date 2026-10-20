@@ -46,7 +46,7 @@ liangjiewis.com (量界智算) répertorie **97 modèles** et ne permet l’insc
 | Enregistrement quotidien | **désactivé** (`签到功能未启用`) — aucun rechargement |
 | Modèles gratuits | **aucun** — `/api/pricing` (129 lignes, lu avec une session de compte) indique 0 modèle gratuit |
 | Captcha à l'inscription | **aucun** (`turnstile_check: false`) |
-| E‑mail accepté par le panneau | forme simple `@gmail.com` (sans point) ; `@qq.com` est refusé (`550 … non-existent account`) ; envoyez via `1449683658@qq.com` (sujet `量界智算邮箱验证邮件`) — épinglez‑le avec `--sender "1449683658\\|量界智算"` |
+| E‑mail accepté par le panneau | forme simple `@gmail.com` (sans point) ; `@qq.com` est refusé (`550 … non-existent account`) ; envoyez via `1449683658` (sujet `量界智算邮箱验证邮件`) — épinglez‑le avec `--sender "1449683658\\|量界智算"` |
 | Ce qu’une clé créée peut faire aujourd’hui | `GET /v1/models` **200** (97 modèles) — authentique ; `POST /v1/chat/completions` **403** `insufficient_user_quota` jusqu’à ce que le compte soit financé |
 | L’unité qui s’échelle | **un compte = une clé** → `--count N` signifie réellement « N comptes, chacun avec son propre solde » |
 
@@ -172,7 +172,7 @@ Tout le code se trouve dans `src/` — lancez‑le depuis la racine du dépôt a
 * Les sorties proviennent de `proxies.txt` (une ligne par sortie, `scheme://host:port`, prise en charge de `user:pass@`, les commentaires `#` sont ignorés). Le même pool alimente les appels du panneau, la vérification des clés et la lecture des boîtes aux lettres ; les outils ne contactent jamais directement le fournisseur.
 * **Le filtrage fait le travail.** Chaque compte épingle la première sortie qui prouve `GET /api/status` contre l’hôte du panneau, et la vérification épingle une sortie *différente* prouvée — une sortie morte se retire d’elle‑même et le compte passe à la suivante.
 * La boîte aux lettres ([Emailnator](https://www.emailnator.com)) est un service de mail temporaire tiers, pas le panneau ; son API est également lue via vos sorties.
-* Le mail de vérification provient de **`1449683658@qq.com`** (`量界智算邮箱验证邮件`) — pas du domaine du panneau — ce qui explique pourquoi le `--sender` par défaut épingle cet expéditeur afin qu’un code provenant d’une boîte partagée ne puisse jamais être soumis.
+* Le mail de vérification provient de **`1449683658`** (`量界智算邮箱验证邮件`) — pas du domaine du panneau — ce qui explique pourquoi le `--sender` par défaut épingle cet expéditeur afin qu’un code provenant d’une boîte partagée ne puisse jamais être soumis.
 
 ## 📄 Files
 

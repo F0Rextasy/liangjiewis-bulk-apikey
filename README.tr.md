@@ -46,7 +46,7 @@ liangjiewis.com (量界智算) **97 model** listeler ve kaydı yalnızca e-posta
 | Günlük check-in | **devre dışı** (`签到功能未启用`) — yenileme yok |
 | Sıfır fiyatlı modeller | **hiçbiri** — `/api/pricing` (129 satır, bir hesap oturumuyla okunur) 0 sıfır fiyatlı model listeler |
 | Kayıtta captcha | **yok** (`turnstile_check: false`) |
-| Panelin kabul ettiği e-posta | düz `@gmail.com` (noktasız biçim); `@qq.com` reddedilir (`550 … non-existent account`); `1449683658@qq.com` üzerinden gönderin (konu `量界智算邮箱验证邮件`) — `--sender "1449683658\|量界智算"` ile sabitleyin |
+| Panelin kabul ettiği e-posta | düz `@gmail.com` (noktasız biçim); `@qq.com` reddedilir (`550 … non-existent account`); `1449683658` üzerinden gönderin (konu `量界智算邮箱验证邮件`) — `--sender "1449683658\|量界智算"` ile sabitleyin |
 | Üretilen bir anahtarın bugün yapabildiği | `GET /v1/models` **200** (97 model) — otantik; bakiye yüklenene kadar `POST /v1/chat/completions` **403** `insufficient_user_quota` |
 | Ölçeklenen birim | **bir hesap = bir anahtar** → `--count N` aslında "her biri kendi bakiyesine sahip N hesap" demektir |
 
@@ -172,7 +172,7 @@ Tüm kod `src/` içinde — depo kökünden `node src/<file>.js` olarak çalış
 * Çıkışlar `proxies.txt` dosyasından gelir (çıkış başına bir satır, `scheme://host:port`, `user:pass@` desteklenir, `#` yorumları yok sayılır). Aynı havuz panel çağrılarını, anahtar doğrulamasını ve posta kutusu okumalarını besler; araçlar sağlayıcıyı asla doğrudan aramaz.
 * **Eleme iştir.** Her hesap, panel ana bilgisayarına karşı `GET /api/status` kanıtlayan ilk çıkışı sabitler ve doğrulama *farklı* bir kanıtlanmış çıkışı sabitler — ölü bir çıkış kendini emekliye ayırır ve hesap bir sonrakinde devam eder.
 * Posta kutusu ([Emailnator](https://www.emailnator.com)) panel değil, üçüncü taraf bir geçici posta hizmetidir; API'si de çıkışlarınız üzerinden okunur.
-* Doğrulama postası **`1449683658@qq.com`** (`量界智算邮箱验证邮件`) adresinden gelir — panel alan adından değil — bu yüzden varsayılan `--sender` o göndereni sabitler, böylece paylaşılan kutudaki bir yabancının kodu asla gönderilemez.
+* Doğrulama postası **`1449683658`** (`量界智算邮箱验证邮件`) adresinden gelir — panel alan adından değil — bu yüzden varsayılan `--sender` o göndereni sabitler, böylece paylaşılan kutudaki bir yabancının kodu asla gönderilemez.
 
 ## 📄 Dosyalar
 

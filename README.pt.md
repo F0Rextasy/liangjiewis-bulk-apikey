@@ -46,7 +46,7 @@ liangjiewis.com (量界智算) lista **97 modelos** e restringe o cadastro apena
 | Check-in diário | **desativado** (`签到功能未启用`) — sem recarga |
 | Modelos com preço zero | **nenhum** — `/api/pricing` (129 linhas, lidas com uma sessão de conta) lista 0 modelo com preço zero |
 | Captcha no cadastro | **nenhum** (`turnstile_check: false`) |
-| E-mail que o painel aceita | `@gmail.com` comum (forma sem ponto); `@qq.com` é recusado (`550 … non-existent account`); o envio ocorre via `1449683658@qq.com` (assunto `量界智算邮箱验证邮件`) — fixe-o com `--sender "1449683658\|量界智算"` |
+| E-mail que o painel aceita | `@gmail.com` comum (forma sem ponto); `@qq.com` é recusado (`550 … non-existent account`); o envio ocorre via `1449683658` (assunto `量界智算邮箱验证邮件`) — fixe-o com `--sender "1449683658\|量界智算"` |
 | O que uma chave gerada pode fazer hoje | `GET /v1/models` **200** (97 modelos) — autêntica; `POST /v1/chat/completions` **403** `insufficient_user_quota` até receber crédito |
 | A unidade que escala | **uma conta = uma chave** → `--count N` na prática significa "N contas, cada uma com seu próprio saldo" |
 
@@ -172,7 +172,7 @@ Todo o código fica em `src/` — execute a partir da raiz do repositório como 
 * As saídas vêm de `proxies.txt` (uma linha por saída, `scheme://host:port`, `user:pass@` aceito, comentários `#` ignorados). O mesmo pool alimenta as chamadas ao painel, a verificação das chaves e as leituras da caixa de entrada; as ferramentas nunca acessam o provedor diretamente.
 * **A triagem é o trabalho.** Cada conta fixa a primeira saída que comprova `GET /api/status` contra o host do painel, e a verificação fixa uma saída comprovada *diferente* — uma saída morta se aposenta sozinha e a conta continua na próxima.
 * A caixa de entrada ([Emailnator](https://www.emailnator.com)) é um serviço de e-mail temporário de terceiros, não o painel; sua API também é lida pelas suas saídas.
-* O e-mail de verificação chega de **`1449683658@qq.com`** (`量界智算邮箱验证邮件`) — não do domínio do painel —, e é por isso que o `--sender` padrão fixa esse remetente, para que o código de um estranho em uma caixa compartilhada nunca possa ser enviado.
+* O e-mail de verificação chega de **`1449683658`** (`量界智算邮箱验证邮件`) — não do domínio do painel —, e é por isso que o `--sender` padrão fixa esse remetente, para que o código de um estranho em uma caixa compartilhada nunca possa ser enviado.
 
 ## 📄 Arquivos
 

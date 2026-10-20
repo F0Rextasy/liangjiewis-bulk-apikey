@@ -46,7 +46,7 @@ liangjiewis.com (量界智算) lists **97 models** and gates sign-up only by e-m
 | Daily check-in | **disabled** (`签到功能未启用`) — no refill |
 | Zero-price models | **none** — `/api/pricing` (129 rows, read with an account session) lists 0 zero-price model |
 | Captcha at sign-up | **none** (`turnstile_check: false`) |
-| E-mail the panel accepts | plain `@gmail.com` (dot-free form); `@qq.com` is refused (`550 … non-existent account`); send via `1449683658@qq.com` (subject `量界智算邮箱验证邮件`) — pin it with `--sender "1449683658\|量界智算"` |
+| E-mail the panel accepts | plain `@gmail.com` (dot-free form); `@qq.com` is refused (`550 … non-existent account`); send via `1449683658` (subject `量界智算邮箱验证邮件`) — pin it with `--sender "1449683658\|量界智算"` |
 | What a minted key can do today | `GET /v1/models` **200** (97 models) — authentic; `POST /v1/chat/completions` **403** `insufficient_user_quota` until funded |
 | The unit that scales | **one account = one key** → `--count N` is really "N accounts, each with its own balance" |
 
@@ -103,7 +103,7 @@ Until the account is funded this answers `403 insufficient_user_quota` — the r
 cd liangjiewis-bulk-apikey
 
 # 1) your proxy list, one exit per line (http://, socks5://, socks4:// or bare host:port)
-printf 'socks5://127.0.0.1:1080\n' > proxies.txt
+printf 'socks5://127.0.0.1:1080\n' > proxies.txt   # optional — without it the tool runs direct
 
 # 2) go
 node src/launcher.js                            # interactive: mint / verify / settings
@@ -115,7 +115,7 @@ node src/cli.js help                            # task list
 node src/mint.js --count 3 --help               # mint's own flag reference
 ```
 
-Keys are appended to `keys.txt`, one per line, once a key has answered `GET /v1/models` 200 *and* a model call has come back for it — on a fresh account here that call is the credit refusal, which is recorded as exactly that and does not withhold the key. Accounts run one after another; `--count 10` is a long run, and `out/pinned-<date>.log` is the running record of it. Nothing is sent to the panel that does not go through an exit from `proxies.txt`.
+Keys are appended to `keys.txt`, one per line, once a key has answered `GET /v1/models` 200 *and* a model call has come back for it — on a fresh account here that call is the credit refusal, which is recorded as exactly that and does not withhold the key. Accounts run one after another; `--count 10` is a long run, and `out/pinned-<date>.log` is the running record of it. With a pool provided, every request to the panel goes through an exit from `proxies.txt`; without one the tool connects directly.
 
 ### 🖱️ The launcher
 
@@ -163,16 +163,21 @@ All code lives in `src/` — run it from the repository root as `node src/<file>
 
 | Tool | Flags |
 | --- | --- |
-| `src/mint.js` | `--count N` (3) · `--pool FILE` (`proxies.txt`) · `--mail emailnator\|imap` · `--imap-user` / `--imap-pass` (or `IMAP_USER` / `IMAP_PASS`) · `--mail-address` · `--sender REGEX` (default `1449683658\|量界智算`) · `--model ID` · `--poll-ms` (2000) · `--code-wait` (300000) · `--max-cycle` (3) · `--scan` (200) · `--scan-conc` (8, max 8) · `--budget` (2400 s) · `--base URL` |
-| `src/verify.js` | `--key K` · `--all` · `--model ID` · `--max-tokens` (8) · `--want` (3) · `--pool FILE` · `--base URL` |
+| `src/mint.js` | `--count N` (3) · `--pool FILE` (`proxies.txt`, optional) · `--mail emailnator\|imap` · `--imap-user` / `--imap-pass` (or `IMAP_USER` / `IMAP_PASS`) · `--mail-address` · `--sender REGEX` (default `1449683658\|量界智算`) · `--model ID` · `--poll-ms` (2000) · `--code-wait` (300000) · `--max-cycle` (3) · `--scan` (200) · `--scan-conc` (8, max 8) · `--budget` (2400 s) · `--base URL` |
+| `src/verify.js` | `--key K` · `--all` · `--model ID` · `--max-tokens` (8) · `--want` (3) · `--pool FILE` (optional) · `--base URL` |
 | `src/launcher.js` | interactive: mint / verify / settings — `count` and `concurrency` persist in `launcher.config.json` |
 
 ## 🛰️ Behind a proxy
 
-* Exits come from `proxies.txt` (one line per exit, `scheme://host:port`, `user:pass@` supported, `#` comments ignored). The same pool feeds the panel calls, the key verification and the mailbox reads; the tools never dial the provider directly.
+**Optional — recommended at scale (per-IP limits, bans).** The tool works without a proxy too.
+
+* **With a pool:** pass `--pool <file>` (or put exits in `proxies.txt`) and every request goes through an exit from that list — a dead line fails that attempt and the tool moves to the next one.
+* **Without a pool:** the CLI prints `running WITHOUT a proxy (direct)` and connects directly. Nothing about sign-up, key minting or verification changes — only where the packets leave from.
+
+* Exits come from `proxies.txt` (one line per exit, `scheme://host:port`, `user:pass@` supported, `#` comments ignored). The same pool feeds the panel calls, the key verification and the mailbox reads when one is provided; without a pool the tools connect directly.
 * **Screening is the work.** Each account pins the first exit that proves `GET /api/status` against the panel host, and verification pins a *different* proven exit — a dead exit retires itself and the account continues on the next one.
-* The mailbox ([Emailnator](https://www.emailnator.com)) is a third-party temp-mail service rather than the panel; its API is read through your exits as well.
-* The verification mail arrives from **`1449683658@qq.com`** (`量界智算邮箱验证邮件`) — not the panel domain — which is why the default `--sender` pins that sender so a shared-box stranger's code can never be submitted.
+* The mailbox ([Emailnator](https://www.emailnator.com)) is a third-party temp-mail service rather than the panel; its API is read through your exits as well when a pool is provided.
+* The verification mail arrives from **`1449683658`** (`量界智算邮箱验证邮件`) — not the panel domain — which is why the default `--sender` pins that sender so a shared-box stranger's code can never be submitted.
 
 ## 📄 Files
 

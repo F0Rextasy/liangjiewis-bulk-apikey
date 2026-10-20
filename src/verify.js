@@ -36,7 +36,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { ExitPool, loadExits, readJson, writeJson, appendLine, nowIso, req, isExitError } = require('./lib.js');
+const { ExitPool, DIRECT, loadExits, readJson, writeJson, appendLine, nowIso, req, isExitError } = require('./lib.js');
 const { Panel } = require('./newapi.js');
 
 const BASE = 'https://liangjiewis.com';
@@ -57,14 +57,15 @@ usage: node src/verify.js [options]
   --model ID[,ID]  model(s) for the completion check (default: cheapest listed)
   --max-tokens N   tokens to ask for (default 8)
   --want N         independent exits to prove before checking keys (default 3)
-  --pool FILE      exit list, one per line (default proxies.txt)
+  --pool FILE      exit list, one per line (default proxies.txt), optional
   --base URL       panel address (default ${BASE})
   --help           this text
 
-Every call rides an exit from proxies.txt; the exit that verified a key is
-recorded next to the exit that minted it, so "the key works" is never confused
-with "this session works". A key no exit could be measured on is reported as
-unmeasured (\`error\`), never as dead.`;
+Requests go through your proxy list when one is provided (--pool / env). Without
+a pool the tool connects directly. The exit that verified a key is recorded next
+to the exit that minted it, so "the key works" is never confused with "this
+session works". A key no exit could be measured on is reported as unmeasured
+(\`error\`), never as dead.`;
 
 const argv = process.argv.slice(2);
 const has = (name) => argv.includes(`--${name}`);
@@ -88,10 +89,6 @@ for (const a of argv) {
 }
 
 const pool = path.resolve(ROOT, one('pool') || POOL);
-if (!fs.existsSync(pool)) {
-  console.error(`no exit list at ${pool}\n  one exit per line, e.g. socks5://127.0.0.1:1080 — see README "Behind a proxy"`);
-  process.exit(2);
-}
 
 const BASE_URL = one('base') || BASE;
 const ONLY_KEY = one('key') || '';
@@ -143,7 +140,9 @@ function classify(models, chat) {
 class ExitCursor {
   constructor(pool, { avoid = [] } = {}) {
     this.queue = pool.slice();
-    this.skip = new Set(avoid.filter(Boolean));
+    // The direct sentinel is never "avoided": with no pool there is no second
+    // hop to pick instead of the one that minted the key.
+    this.skip = new Set(avoid.filter((l) => l && l !== DIRECT.line));
     this.proven = []; // exits that answered a panel answer for some key — worth more than an untried candidate
   }
   take() {
@@ -158,7 +157,8 @@ class ExitCursor {
     return this.proven.find((p) => !this.skip.has(p.line)) || null;
   }
   died(line) {
-    if (line) this.skip.add(line);
+    if (!line || line === DIRECT.line) return; // the direct route never dies — there is no alternative hop
+    this.skip.add(line);
     this.proven = this.proven.filter((p) => p.line !== line);
   }
   answered(pin) {
@@ -314,29 +314,35 @@ async function measure(rec, cursor) {
     return;
   }
 
-  // ---- exits: the user's pool, screened for this host, proven list first
-  const candidates = loadExits([pool], { shuffle: true });
-  if (!candidates.length) {
-    log(`no exits parsed from ${path.basename(pool)} — one per line, e.g. socks5://127.0.0.1:1080`);
-    return;
-  }
-  const { good, tried } = await screen(candidates, { want: WANT, conc: Math.min(4, WANT), budgetMs: 240000 });
-  if (!good.length) {
-    log(`no usable exit for ${HOST} (${tried.length} tried) — no key was measured, ${todo.length} key(s) left untouched`);
-    return;
-  }
-  try {
-    const file = path.join(OUT, `screened-${HOST}.txt`);
-    const known = new Set();
-    if (fs.existsSync(file)) for (const l of fs.readFileSync(file, 'utf8').split('\n')) if (l.trim()) known.add(l.split('#')[0].trim());
-    const fresh = good.filter((p) => !known.has(p.line));
-    if (fresh.length) fs.appendFileSync(file, fresh.map((p) => `${p.line}  # verified ${nowIso()}`).join('\n') + '\n');
-    if (fresh.length) log(`· screened exits → out/screened-${HOST}.txt (+${fresh.length} of ${good.length} proven)`);
-  } catch (e) {
-    log(`· screened list write failed: ${String(e.message).slice(0, 120)}`);
+  // ---- exits: the user's pool, screened for this host, proven list first.
+  // No pool = DIRECT mode: `loadExits` hands the `null` sentinel and the run
+  // connects directly (a proxy stays recommended at scale, never required).
+  const loaded = loadExits([pool], { shuffle: true });
+  const directExit = !loaded.some(Boolean);
+  const candidates = loaded.filter(Boolean);
+  let good = directExit ? [DIRECT] : [];
+  let tried = [];
+  if (!directExit) {
+    const screened = await screen(candidates, { want: WANT, conc: Math.min(4, WANT), budgetMs: 240000 });
+    tried = screened.tried;
+    good = screened.good;
+    if (!good.length) {
+      log(`no usable exit for ${HOST} (${tried.length} tried) — no key was measured, ${todo.length} key(s) left untouched`);
+      return;
+    }
+    try {
+      const file = path.join(OUT, `screened-${HOST}.txt`);
+      const known = new Set();
+      if (fs.existsSync(file)) for (const l of fs.readFileSync(file, 'utf8').split('\n')) if (l.trim()) known.add(l.split('#')[0].trim());
+      const fresh = good.filter((p) => !known.has(p.line));
+      if (fresh.length) fs.appendFileSync(file, fresh.map((p) => `${p.line}  # verified ${nowIso()}`).join('\n') + '\n');
+      if (fresh.length) log(`· screened exits → out/screened-${HOST}.txt (+${fresh.length} of ${good.length} proven)`);
+    } catch (e) {
+      log(`· screened list write failed: ${String(e.message).slice(0, 120)}`);
+    }
   }
 
-  log(`verify ${todo.length} key(s) for liangjiewis (${BASE_URL}) · exits ${good.length} proven of ${tried.length} tried · want ${WANT}`);
+  log(`verify ${todo.length} key(s) for liangjiewis (${BASE_URL}) · ${directExit ? 'exits direct (no pool)' : `exits ${good.length} proven of ${tried.length} tried`} · want ${WANT}`);
 
   const cursor = new ExitCursor(good, { avoid: todo.map((r) => (r.verify && r.verify.mintExit) || (r.verifyIndependent && r.verifyIndependent.mintExit)).filter(Boolean) });
   const results = [];

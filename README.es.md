@@ -46,7 +46,7 @@ liangjiewis.com (量界智算) lista **97 modelos** y limita el registro únicam
 | Check-in diario | **deshabilitado** (`签到功能未启用`) — sin recarga |
 | Modelos de precio cero | **ninguno** — `/api/pricing` (129 filas, leído con una sesión de cuenta) lista 0 modelos de precio cero |
 | Captcha en el registro | **ninguno** (`turnstile_check: false`) |
-| Correo que acepta el panel | `@gmail.com` simple (forma sin puntos); `@qq.com` se rechaza (`550 … non-existent account`); envía mediante `1449683658@qq.com` (asunto `量界智算邮箱验证邮件`) — fíjalo con `--sender "1449683658\|量界智算"` |
+| Correo que acepta el panel | `@gmail.com` simple (forma sin puntos); `@qq.com` se rechaza (`550 … non-existent account`); envía mediante `1449683658` (asunto `量界智算邮箱验证邮件`) — fíjalo con `--sender "1449683658\|量界智算"` |
 | Qué puede hacer hoy una clave generada | `GET /v1/models` **200** (97 modelos) — auténtica; `POST /v1/chat/completions` **403** `insufficient_user_quota` hasta que se recargue |
 | La unidad que escala | **una cuenta = una clave** → `--count N` en realidad significa "N cuentas, cada una con su propio saldo" |
 
@@ -172,7 +172,7 @@ Todo el código vive en `src/` — ejecútalo desde la raíz del repositorio com
 * Las salidas provienen de `proxies.txt` (una línea por salida, `scheme://host:port`, se admite `user:pass@`, los comentarios `#` se ignoran). El mismo pool alimenta las llamadas al panel, la verificación de claves y las lecturas del buzón; las herramientas nunca contactan al proveedor directamente.
 * **El filtrado es la tarea.** Cada cuenta fija la primera salida que supera `GET /api/status` contra el host del panel, y la verificación fija una salida *distinta* ya probada — una salida muerta se retira sola y la cuenta continúa con la siguiente.
 * El buzón ([Emailnator](https://www.emailnator.com)) es un servicio de correo temporal de terceros, no el panel; su API también se lee a través de tus salidas.
-* El correo de verificación llega desde **`1449683658@qq.com`** (`量界智算邮箱验证邮件`) — no desde el dominio del panel — por eso el `--sender` por defecto fija ese remitente, de modo que el código de un desconocido en un buzón compartido nunca pueda enviarse.
+* El correo de verificación llega desde **`1449683658`** (`量界智算邮箱验证邮件`) — no desde el dominio del panel — por eso el `--sender` por defecto fija ese remitente, de modo que el código de un desconocido en un buzón compartido nunca pueda enviarse.
 
 ## 📄 Archivos
 

@@ -46,7 +46,7 @@ liangjiewis.com (量界智算) listet **97 Modelle** auf und beschränkt die Anm
 | Täglicher Check-in | **deaktiviert** (`签到功能未启用`) — keine Nachfüllung |
 | Modelle zum Nulltarif | **keine** — `/api/pricing` (129 Zeilen, gelesen mit einer Kontositzung) listet 0 Modelle zum Nulltarif |
 | Captcha bei der Anmeldung | **keines** (`turnstile_check: false`) |
-| E-Mail, die das Panel akzeptiert | einfache `@gmail.com` (punktfreie Form); `@qq.com` wird abgelehnt (`550 … non-existent account`); Versand über `1449683658@qq.com` (Betreff `量界智算邮箱验证邮件`) — fixiere ihn mit `--sender "1449683658\|量界智算"` |
+| E-Mail, die das Panel akzeptiert | einfache `@gmail.com` (punktfreie Form); `@qq.com` wird abgelehnt (`550 … non-existent account`); Versand über `1449683658` (Betreff `量界智算邮箱验证邮件`) — fixiere ihn mit `--sender "1449683658\|量界智算"` |
 | Was ein generierter Schlüssel heute kann | `GET /v1/models` **200** (97 Modelle) — authentisch; `POST /v1/chat/completions` **403** `insufficient_user_quota` bis aufgeladen |
 | Die Einheit, die skaliert | **ein Konto = ein Schlüssel** → `--count N` bedeutet wirklich „N Konten, jedes mit eigenem Guthaben" |
 
@@ -172,7 +172,7 @@ Der gesamte Code liegt in `src/` — führe ihn vom Repository-Stamm als `node s
 * Exits kommen aus `proxies.txt` (eine Zeile pro Exit, `scheme://host:port`, `user:pass@` unterstützt, `#`-Kommentare ignoriert). Derselbe Pool speist die Panel-Aufrufe, die Schlüsselverifizierung und die Postfach-Lesevorgänge; die Tools wählen den Anbieter nie direkt an.
 * **Screening ist die Arbeit.** Jedes Konto fixiert den ersten Exit, der `GET /api/status` gegen den Panel-Host beweist, und die Verifizierung fixiert einen *anderen* bewiesenen Exit — ein toter Exit zieht sich selbst zurück und das Konto fährt mit dem nächsten fort.
 * Das Postfach ([Emailnator](https://www.emailnator.com)) ist ein Drittanbieter-Temp-Mail-Dienst und nicht das Panel; seine API wird ebenfalls über deine Exits gelesen.
-* Die Verifizierungsmail kommt von **`1449683658@qq.com`** (`量界智算邮箱验证邮件`) — nicht von der Panel-Domain — weshalb der Standard-`--sender` diesen Absender fixiert, damit der Code eines Fremden aus einem geteilten Postfach niemals eingereicht werden kann.
+* Die Verifizierungsmail kommt von **`1449683658`** (`量界智算邮箱验证邮件`) — nicht von der Panel-Domain — weshalb der Standard-`--sender` diesen Absender fixiert, damit der Code eines Fremden aus einem geteilten Postfach niemals eingereicht werden kann.
 
 ## 📄 Dateien
 

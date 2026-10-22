@@ -54,7 +54,11 @@ async function login9router(base, password) {
     headers: { 'Content-Type': 'application/json', 'User-Agent': UA },
     body: JSON.stringify({ password: password ?? DEFAULTS.password }),
   });
-  const sc = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : [];
+  // `getSetCookie()` is undici ≥ 5.19 (Node ≥ 18.14) and package.json promises
+  // Node >= 18: on 18.0–18.13 the jar stayed empty while the login still said
+  // `ok`, and every call after it answered 401.
+  const raw = res.headers.get('set-cookie');
+  const sc = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : raw ? raw.split(/,(?=[^;,]+=)/) : [];
   const cookie = sc.map((c) => c.split(';')[0]).join('; ');
   return { ok: res.ok, cookie, body: (await res.text()).slice(0, 200) };
 }

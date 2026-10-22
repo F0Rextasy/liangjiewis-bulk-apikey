@@ -19,7 +19,8 @@
  *   authentic     models 200, the completion channel answered neither way
  *   key_refused   the panel answered the key itself (401 `invalid_api_key`)
  *   account_banned the panel banned the account (`auth.user_banned`)
- *   error         no candidate exit answered — the key was never measured
+ *   error         the key was never measured (no exit answered, or the panel
+ *                 answered a status that is not about the key)
  *
  *   node src/verify.js                 # every key on disk that is not already ok
  *   node src/verify.js --key <key>     # one key
@@ -36,8 +37,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const { ExitPool, DIRECT, loadExits, readJson, writeJson, appendLine, nowIso, req, isExitError } = require('./lib.js');
+const { ExitPool, DIRECT, poolOrDirect, readJson, writeJson, appendLine, nowIso, req, isExitError } = require('./lib.js');
 const { Panel } = require('./newapi.js');
+const { exitLine } = require('./proxy.js');
 
 const BASE = 'https://liangjiewis.com';
 const HOST = new URL(BASE).host;
@@ -125,6 +127,9 @@ function rankCheapest(ids) {
 const looksQuota = (text) => /insufficient|quota|额度|余额|balance/i.test(String(text || ''));
 const looksAccountBanned = (text) => /user_banned|user banned|账号封禁|账号已被封禁|account.*banned/i.test(String(text || ''));
 
+/** Key statuses that are the panel refusing *this key*; anything else is not a verdict. */
+const KEY_REFUSED_STATUS = new Set([401, 402, 403]);
+
 /** What the panel answered for a key, never for the exit. */
 function classify(models, chat) {
   if (models.status === 200) {
@@ -133,6 +138,9 @@ function classify(models, chat) {
     return 'authentic';
   }
   if (looksAccountBanned(models.text)) return 'account_banned';
+  // A 429 or a 5xx says nothing about the key (`429` is a rate limit, `502` is a
+  // bad night for the panel): those stay unmeasured instead of reading as dead.
+  if (!KEY_REFUSED_STATUS.has(models.status)) return 'error';
   return 'key_refused';
 }
 
@@ -235,6 +243,7 @@ async function measure(rec, cursor) {
       out.exit = pin.line;
       out.models = { status: models.status, body: String(models.text || '').slice(0, 300), exit: pin.line };
       out.verdict = classify(models, null);
+      if (out.verdict === 'error') out.note = `the panel answered ${models.status} without naming the key — not measured`;
       log(`#${rec.index} ${rec.key.slice(0, 10)}… /v1/models ${models.status} · ${out.models.body.slice(0, 140)}`);
       return out;
     }
@@ -315,9 +324,10 @@ async function measure(rec, cursor) {
   }
 
   // ---- exits: the user's pool, screened for this host, proven list first.
-  // No pool = DIRECT mode: `loadExits` hands the `null` sentinel and the run
-  // connects directly (a proxy stays recommended at scale, never required).
-  const loaded = loadExits([pool], { shuffle: true });
+  // No pool = DIRECT mode: `poolOrDirect` hands the `null` sentinel and the run
+  // connects directly (a proxy stays recommended at scale, never required) — but
+  // a pool file that *has* lines and no usable exit stops the run instead.
+  const loaded = poolOrDirect([pool], { shuffle: true });
   const directExit = !loaded.some(Boolean);
   const candidates = loaded.filter(Boolean);
   let good = directExit ? [DIRECT] : [];
@@ -334,8 +344,8 @@ async function measure(rec, cursor) {
       const file = path.join(OUT, `screened-${HOST}.txt`);
       const known = new Set();
       if (fs.existsSync(file)) for (const l of fs.readFileSync(file, 'utf8').split('\n')) if (l.trim()) known.add(l.split('#')[0].trim());
-      const fresh = good.filter((p) => !known.has(p.line));
-      if (fresh.length) fs.appendFileSync(file, fresh.map((p) => `${p.line}  # verified ${nowIso()}`).join('\n') + '\n');
+      const fresh = good.filter((p) => !known.has(exitLine(p)));
+      if (fresh.length) fs.appendFileSync(file, fresh.map((p) => `${exitLine(p)}  # verified ${nowIso()}`).join('\n') + '\n');
       if (fresh.length) log(`· screened exits → out/screened-${HOST}.txt (+${fresh.length} of ${good.length} proven)`);
     } catch (e) {
       log(`· screened list write failed: ${String(e.message).slice(0, 120)}`);
@@ -389,7 +399,7 @@ async function measure(rec, cursor) {
   if (accountBanned) parts.push(`${accountBanned} account(s) banned by the panel (auth.user_banned)`);
   if (refused) parts.push(`${refused} key(s) refused`);
   if (unmeasured) parts.push(`${unmeasured} unmeasured`);
-  const tail = unmeasured ? ' — re-run to measure them (an exit problem is not a key verdict)' : '';
+  const tail = unmeasured ? ' — re-run to measure them (unmeasured is not dead)' : '';
   log(`done: liangjiewis — ${parts.join(' · ')}${tail}`);
 })().catch((e) => {
   log(`FATAL ${e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e}`);

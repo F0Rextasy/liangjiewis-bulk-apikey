@@ -38,9 +38,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const { loadExits, ExitPool, DIRECT, providerDir, readJson, writeJson, appendLine, sleep, randHex, randPass, nowIso, extractCode, req, isExitError } = require('./lib');
+const { loadExits, poolOrDirect, ExitPool, DIRECT, providerDir, readJson, writeJson, appendLine, sleep, randHex, randPass, nowIso, extractCode, req, isExitError } = require('./lib');
 const { Panel, gates, UA } = require('./newapi');
-const { createAgent } = require(path.join(__dirname, 'proxy'));
+const { createAgentFor } = require(path.join(__dirname, 'proxy'));
 const { presetArgv, resolvePreset } = require('./preset');
 
 let emailnator = null;
@@ -68,6 +68,12 @@ const NAME = one('name');
 const BASE = one('base');
 const TAG = one('tag', (NAME || 'x').slice(0, 12));
 const COUNT = parseInt(one('count', '3'), 10);
+// `--count abc` (or `--count --probe`) is NaN, and NaN runs zero accounts and
+// then reports whatever it likes: refuse it where it is read.
+if (!Number.isFinite(COUNT) || COUNT < 1) {
+  console.error('--count takes a positive integer');
+  process.exit(2);
+}
 const FOLDER = one('folder', `${NAME}-bulk`);
 const CHECKIN = !has('no-checkin');
 const POOLS = many('pool');
@@ -106,7 +112,7 @@ const GAP_MS = Math.max(0, Math.round((SHAPE.gap == null ? 0 : SHAPE.gap) * 1000
 /** `user:pass@host` in an exit line is never printed (spec form: `user:***@host`). */
 const maskExit = (line) => String(line || 'direct').replace(/:[^:@/]+@/, ':***@');
 /** Keep-alive agent bound to `pin` — none at all when the pin is direct (no pool). */
-const agentFor = (pin) => (pin && !pin.direct ? createAgent(pin, { keepAlive: true, maxSockets: 1 }) : null);
+const agentFor = (pin) => (pin && !pin.direct ? createAgentFor(pin, BASE, { keepAlive: true, maxSockets: 1 }) : null);
 /** The exit line to record for a pin: `direct` when no exit carried the request. */
 const exitLabel = (p) => (p && (p.line || `${p.host}:${p.port}`)) || 'direct';
 // Controls (Main, 2026-10-15): cycle 1 submits on the first poll; cycles
@@ -635,7 +641,7 @@ async function probeRegister(panel, email) {
 // --------------------------------------------------------------------------- main
 
 (async () => {
-  const priority = loadSoft(POOLS.length ? POOLS.filter((f) => !/emailnator|mail/.test(f)) : HOT_FILES);
+  const priority = POOLS.length ? poolOrDirect(POOLS.filter((f) => !/emailnator|mail/.test(f)), { shuffle: false }) : loadSoft(HOT_FILES);
   for (const a of loadAnnotated(path.join(ROOT, 'out', 'pool-exits.txt'))) {
     try {
       const p = require('./proxy.js').parseProxy(a.line);
@@ -664,7 +670,7 @@ async function probeRegister(panel, email) {
   const hunter = new PinHunter(priority, cold);
   const poolMail = await fetchPool({ target: 'www.emailnator.com', limit: 20 });
   const mailExits = [];
-  for (const f of [...(poolMail.lines || []), ...loadExits(MAIL_POOLS.length ? MAIL_POOLS : MAIL_FILES, { shuffle: true }).filter(Boolean).map((p) => ({ line: p.line, klass: p.klass }))]) {
+  for (const f of [...(poolMail.lines || []), ...poolOrDirect(MAIL_POOLS.length ? MAIL_POOLS : MAIL_FILES, { shuffle: true }).filter(Boolean).map((p) => ({ line: p.line, klass: p.klass }))]) {
     try {
       const p = require('./proxy.js').parseProxy(f.line);
       if (p) {
@@ -712,6 +718,7 @@ async function probeRegister(panel, email) {
     } catch (e) {
       log(`  gates probe: ${pin.line} died (${String(e.message).slice(0, 80)}) — re-pinning`);
       hunter.retire(pin);
+      if (panel.agent) panel.agent.destroy(); // the tunnel this probe opened is not the one the run will use
     }
   }
   if (!st) throw new Error(`no exit answers ${BASE}/api/status (scanned ${hunter.scanned})`);
@@ -800,6 +807,10 @@ async function probeRegister(panel, email) {
     const username = `${TAG}${randHex(6)}`.slice(0, 18);
     const password = randPass();
     const rec = { provider: NAME, base: BASE, index, username, password, created: nowIso(), steps: {}, cycles: [] };
+    // Every keep-alive agent this account opens (one tunnel each, held for the
+    // account's whole flow): closed when the account is done, or a 20-account run
+    // leaves 20 idle tunnels open at the exit for the rest of the day.
+    const owned = [];
     let box = null;
     let done = false;
     let started = false;
@@ -837,6 +848,7 @@ async function probeRegister(panel, email) {
         hunter.claim(pin, owner);
         log(`  pin ${pin.line}${pin.klass ? ` [class=${pin.klass}]` : ''}${reuse ? ' (reused)' : ` (scanned ${tested})`}`);
         panel = pinnedPanel(pin);
+        owned.push(panel.agent);
 
         if (!box) {
           if (MAIL_MODE === 'imap') {
@@ -980,6 +992,7 @@ async function probeRegister(panel, email) {
             panel.supply.pin = got2.pin;
             panel.supply.dead = false;
             panel.agent = agentFor(got2.pin);
+            owned.push(panel.agent);
             log(`  re-pin for ${why}: ${got2.pin.line}`);
             return got2.pin;
           };
@@ -1054,6 +1067,7 @@ async function probeRegister(panel, email) {
               const altLine = alt.pin && exitLabel(alt.pin);
               if (alt.pin && altLine !== mintExit) {
                 verifier = pinnedPanel(alt.pin);
+                owned.push(verifier.agent);
                 hunter.claim(alt.pin, owner);
                 verifyExit = altLine;
                 independent = true;
@@ -1172,6 +1186,9 @@ async function probeRegister(panel, email) {
       }
     }
 
+    for (const a of owned) {
+      try { if (a) a.destroy(); } catch (e) { /* the account is over either way */ }
+    }
     accounts.push(rec);
     writeJson(ACCOUNTS, accounts);
     if (PROBE) return;
@@ -1202,7 +1219,11 @@ async function probeRegister(panel, email) {
 
   const minted = accounts.filter((a) => a.provider === NAME && a.status === 'minted').length;
   log(`done: ${NAME} — ${made.length} new key(s) this run, ${minted} minted account(s) total · pins scanned=${hunter.scanned} statuses=${JSON.stringify(hunter.statusHist)}`);
-  console.log(`${String(NAME || 'mint').toUpperCase()} ${made.length}/${total} OK`);
+  // `OK` only when the run really hit its target: the last line is what a wrapper
+  // reads, and `0/3 OK` with exit 0 is how an empty batch passes for a good one.
+  const met = made.length >= total;
+  console.log(`${String(NAME || 'mint').toUpperCase()} ${made.length}/${total} ${met ? 'OK' : '— short of the target'}`);
+  if (!met) process.exitCode = 1;
 })().catch((e) => {
   log(`FATAL ${e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e}`);
   process.exit(1);

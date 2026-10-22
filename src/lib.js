@@ -19,7 +19,7 @@ const https = require('https');
 const path = require('path');
 const { URL } = require('url');
 
-const { parseProxy, createAgent, loadPoolFile } = require(path.join(__dirname, 'proxy'));
+const { parseProxy, createAgent, createAgentFor, loadPoolFile } = require(path.join(__dirname, 'proxy'));
 
 const ROOT = path.resolve(__dirname, '..'); // the checkout root — user-facing files (out/…) live here
 const CODE_RE = /[0-9]{4,8}/;
@@ -90,6 +90,41 @@ function loadExits(files = DEFAULT_POOLS, { shuffle = true } = {}) {
   return out;
 }
 
+/** Lines a pool file *contributes*: blanks and `#`/`//` comments are not candidates. */
+function poolCandidates(file) {
+  try {
+    return fs
+      .readFileSync(file, 'utf8')
+      .split(/\r?\n/)
+      .map((l) => l.replace(/\s+#.*$/, '').replace(/\s+\/\/.*$/, '').trim())
+      .filter((l) => l && !l.startsWith('#') && !l.startsWith('//')).length;
+  } catch (e) {
+    return 0; // no file (or unreadable): nothing was asked for, which is the direct case
+  }
+}
+
+/**
+ * The pool decision every user-facing tool makes, in one place: no pool file with
+ * candidate lines → DIRECT, as documented (a proxy is recommended at scale, never
+ * required). A file that *has* candidate lines but yields no usable exit → throw:
+ * the empty list `loadExits` returns there is indistinguishable from "no pool",
+ * and the one thing the pool exists to prevent is the whole batch leaving from
+ * this machine's own address. Junk lines, a saved HTML error page, an all-`socks4`
+ * list and lines without a port all land in the second case.
+ */
+function poolOrDirect(files, { shuffle = true } = {}) {
+  const loaded = loadExits(files, { shuffle });
+  if (loaded.some(Boolean)) return loaded;
+  const candidates = (files || []).reduce((n, f) => n + poolCandidates(f), 0);
+  if (candidates) {
+    throw new Error(
+      `${path.basename(String((files && files[0]) || 'pool'))} has ${candidates} candidate line(s) but no usable exit — a line must be scheme://host:port` +
+        ` (user:pass@ and #comments supported); socks4 lines and lines without a port are dropped`
+    );
+  }
+  return loaded; // the [null] sentinel — loadExits has already said the pool is not there
+}
+
 /**
  * One HTTP request — through `proxy`, or straight out when there is no exit:
  * a `null`/absent proxy (the sentinel `loadExits` hands when no pool file
@@ -120,7 +155,7 @@ function req(proxy, url, { method = 'GET', headers = {}, body = null, timeoutMs 
         host: u.hostname,
         port: u.port || (u.protocol === 'https:' ? 443 : 80),
         path: u.pathname + u.search,
-        agent: agent || (exit ? createAgent(exit) : undefined),
+        agent: agent || createAgentFor(exit, url),
         headers: h,
       },
       (res) => {
@@ -279,8 +314,9 @@ function brokerHttp(base, pathname, { method = 'GET', body = null, timeoutMs = 1
 }
 
 /**
- * Gmail aliases exist in two forms of the *same* mailbox: `<user>@gmail.com`
- * (plain) and `<u.s.e.r>@gmail.com` (dotted) — both deliver to one inbox.
+ * Gmail aliases exist in two forms of the *same* mailbox: the plain one
+ * (`<local>@gmail.com`) and the dotted one (`<l.o.c.a.l>@gmail.com`) — both
+ * deliver to one inbox.
  * Measured (2026-10-15, five panels): the dotted form is read as a disposable sub-address and refused,
  * while the plain form is accepted. Emailnator hands out the dotted variant as
  * the box identity, so the reader keys on it — but what goes into a register
@@ -452,24 +488,39 @@ function providerDir(name) {
   return dir;
 }
 
+/**
+ * Reads JSON. A file that is not there is the default; a file that is there and
+ * does not parse is an error, never "no records yet" — reading a half-written
+ * ledger as empty is how one bad write costs every account in it.
+ */
 function readJson(file, dflt = null) {
+  let text;
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    text = fs.readFileSync(file, 'utf8');
   } catch (e) {
     return dflt;
   }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error(`${path.basename(file)} is not valid JSON (${e.message}) — fix or move it aside; the account records live there`);
+  }
 }
 
+/** Writes JSON through a temp file + rename: a kill mid-write cannot truncate the ledger. */
 function writeJson(file, value) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(value, null, 2));
+  const tmp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(value, null, 2), { mode: 0o600 });
+  fs.renameSync(tmp, file);
 }
 
 /** Appends to a newline log without ever throwing (logging must not break a mint). */
 function appendLine(file, line) {
   try {
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.appendFileSync(file, line + '\n');
+    // 0o600: keys.txt holds API keys. POSIX only — Windows keeps its own ACL.
+    fs.appendFileSync(file, line + '\n', { mode: 0o600 });
   } catch (e) {
     /* ignore */
   }
@@ -489,6 +540,7 @@ module.exports = {
   DIRECT,
   exitIp,
   loadExits,
+  poolOrDirect,
   Mail,
   gmailForms,
   plainGmail,

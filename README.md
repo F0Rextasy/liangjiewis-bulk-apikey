@@ -173,6 +173,7 @@ All code lives in `src/` — run it from the repository root as `node src/<file>
 
 * **With a pool:** pass `--pool <file>` (or put exits in `proxies.txt`) and every request goes through an exit from that list — a dead line fails that attempt and the tool moves to the next one.
 * **Without a pool:** the CLI prints `running WITHOUT a proxy (direct)` and connects directly. Nothing about sign-up, key minting or verification changes — only where the packets leave from.
+* **A pool file with lines but no usable exit stops the run** (`… has N candidate line(s) but no usable exit`): a line must be `scheme://host:port` (`socks4://` lines and lines without a port are dropped), and a pool that quietly turns into `direct` is the one accident this option exists to prevent.
 
 * Exits come from `proxies.txt` (one line per exit, `scheme://host:port`, `user:pass@` supported, `#` comments ignored). The same pool feeds the panel calls, the key verification and the mailbox reads when one is provided; without a pool the tools connect directly.
 * **Screening is the work.** Each account pins the first exit that proves `GET /api/status` against the panel host, and verification pins a *different* proven exit — a dead exit retires itself and the account continues on the next one.

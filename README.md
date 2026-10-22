@@ -127,13 +127,13 @@ A menu over the task modules: **mint**, **verify**, **9Router**. It asks for `co
 
 ## ✅ Verified working — every key is tested
 
-Measured **2026-10-15**: **3 accounts → 3 keys, one key per account**. Every key was checked after it existed, on an exit *independent* of the mint, and every key was re-checked later the same day.
+Measured **2026-10-15**: **keys verified**. Every key was checked after it existed, on an exit *independent* of the mint, and every key was re-checked later the same day.
 
 | Model | Live (models) | Real chat call | Measured |
 | --- | --- | --- | --- |
 | `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 12:33 |
 
-**All three were live as written** — re-checked 2026-10-15 13:11 UTC with `src/verify.js` itself: **3/3 keys answered `GET /v1/models` 200** (97 models each, each on a fresh exit — none the mint's), **3/3 out of credit** (`403 insufficient_user_quota`). `GET /v1/models` 200 proves a key is *authentic*; the completion column shows what a fresh account can *spend*. `node src/cli.js verify` reproduces the check for your own file.
+**All three were live as written** — re-checked 2026-10-15 13:11 UTC with `src/verify.js` itself: **verified** (97 models each, each on a fresh exit — none the mint's), **3/3 out of credit** (`403 insufficient_user_quota`). `GET /v1/models` 200 proves a key is *authentic*; the completion column shows what a fresh account can *spend*. `node src/cli.js verify` reproduces the check for your own file.
 
 ## 🧭 How it works
 

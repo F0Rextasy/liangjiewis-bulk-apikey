@@ -99,6 +99,7 @@ print(client.chat.completions.create(model="claude-3-5-haiku-20241022",
 ## 🛠 快速开始
 
 ```bash
+
 # clone this repository (or download the ZIP), then:
 cd liangjiewis-bulk-apikey
 
@@ -107,6 +108,7 @@ printf 'socks5://127.0.0.1:1080\n' > proxies.txt
 
 # 2) go
 node src/launcher.js                            # interactive: mint / verify / settings
+
 # or drive it directly:
 node src/cli.js mint --count 3                  # any N; 3 is the sample default
 node src/cli.js mint --count 10 --scan-conc 8
@@ -192,6 +194,7 @@ inbox (one address per account)                                  a fresh address
 
 ```bash
 node src/connect-9router.js --base http://localhost:20128 --password 123456
+
 # or: node src/cli.js mint --count 3 --connect-9router
 ```
 

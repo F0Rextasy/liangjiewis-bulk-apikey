@@ -99,6 +99,7 @@ Até que a conta receba crédito, isso responde `403 insufficient_user_quota` �
 ## 🛠 Início rápido
 
 ```bash
+
 # clone this repository (or download the ZIP), then:
 cd liangjiewis-bulk-apikey
 
@@ -107,6 +108,7 @@ printf 'socks5://127.0.0.1:1080\n' > proxies.txt
 
 # 2) go
 node src/launcher.js                            # interactive: mint / verify / settings
+
 # or drive it directly:
 node src/cli.js mint --count 3                  # any N; 3 is the sample default
 node src/cli.js mint --count 10 --scan-conc 8
@@ -192,6 +194,7 @@ Todo o código fica em `src/` — execute a partir da raiz do repositório como 
 
 ```bash
 node src/connect-9router.js --base http://localhost:20128 --password 123456
+
 # or: node src/cli.js mint --count 3 --connect-9router
 ```
 

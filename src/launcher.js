@@ -91,7 +91,29 @@ async function nineRouter() {
   }
 }
 
+async function omniRouter() {
+  const { connectKeysFile, connectOmniRoute } = require('./connect-omniroute.js');
+  cfg.routerBase = await ask('OmniRoute base URL', cfg.routerBase || 'http://localhost:20128');
+  cfg.routerPassword = await ask('OmniRoute password', cfg.routerPassword || '123456');
+  save();
+  console.log('');
+  try {
+    await connectKeysFile({ base: cfg.routerBase, password: cfg.routerPassword });
+  } catch (e) {
+    if (!/no API keys/.test(e.message)) throw e;
+    console.log('\n⚠ ' + e.message);
+    const apiKey = await ask('API key to register');
+    if (apiKey) await connectOmniRoute({ base: cfg.routerBase, password: cfg.routerPassword, apiKey });
+  }
+}
+
 async function main() {
+  if (process.argv.includes('--connect-omniroute')) {
+    await omniRouter();
+    rl.close();
+    return;
+  }
+
   process.stdout.write('\x1b[2J\x1b[H');
   banner();
   console.log('  proxy exits: ' + (count(POOL) || 'none — running WITHOUT a proxy (direct)') + '     keys on disk: ' + count(KEYS) + '\n');
@@ -99,6 +121,7 @@ async function main() {
   console.log('  2) verify    re-check keys that are already on disk');
   console.log('  3) Settings');
   console.log('  6) Connect to 9Router   register the keys in keys.txt with a local 9Router');
+  console.log('  7) Connect to OmniRoute   register the keys in keys.txt with a local OmniRoute');
   console.log('  0) Exit\n');
   const choice = await ask('choose', '1');
   if (choice === '1') {
@@ -112,6 +135,9 @@ async function main() {
   }
   else if (choice === '6') {
     await nineRouter();
+  }
+  else if (choice === '7') {
+    await omniRouter();
   } else {
     rl.close();
     return;

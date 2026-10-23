@@ -1,6 +1,6 @@
 <div align="center">
-
 ```
+
 ██╗     ██╗ █████╗ ███╗   ██╗ ██████╗      ██╗██╗███████╗██╗    ██╗██╗███████╗
 ██║     ██║██╔══██╗████╗  ██║██╔════╝      ██║██║██╔════╝██║    ██║██║██╔════╝
 ██║     ██║███████║██╔██╗ ██║██║  ███╗     ██║██║█████╗  ██║ █╗ ██║██║███████╗
@@ -10,7 +10,6 @@
 ```
 
 # liangjiewis-bulk-apikey
-
 **Crea cuentas de liangjiewis.com en masa con claves API generadas automáticamente — inferencia compatible con OpenAI (Claude, GPT, Gemini, DeepSeek, GLM, Qwen) + conector 9Router.**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
@@ -18,9 +17,10 @@
 [![License](https://img.shields.io/badge/license-MIT-6ea8fe?style=for-the-badge)](LICENSE)
 [![Models](https://img.shields.io/badge/models-97%20served-412991?style=for-the-badge)](https://liangjiewis.com)
 [![9Router](https://img.shields.io/badge/9Router-connector-8B5CF6?style=for-the-badge)](#-connect-to-9router)
+[![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Inicio rápido](#-quick-start) · [🎁 Nivel gratuito](#-free-tier--how-much-you-get) · [🤖 Modelos](#-models--all-97-of-them) · [🧪 Usar la API](#-how-to-use-the-api) · [✅ Verificado](#-verified-working--every-key-is-tested) · [🧭 Cómo funciona](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Opciones](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Problemas](#-issues)
+[🛠 Inicio rápido](#-quick-start) · [🎁 Nivel gratuito](#-free-tier--how-much-you-get) · [🤖 Modelos](#-models--all-97-of-them) · [🧪 Usar la API](#-how-to-use-the-api) · [✅ Verificado](#-verified-working--every-key-is-tested) · [🧭 Cómo funciona](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Opciones](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Problemas](#-issues)
 
 </div>
 
@@ -61,6 +61,7 @@ node src/cli.js verify                 # every key in keys.txt is re-tested agai
 `GET https://liangjiewis.com/v1/models` devuelve **97 ids de modelo** para una clave generada, por ejemplo:
 
 ```
+
 claude-opus-5 · claude-sonnet-5 · claude-haiku-4-5-20251001 · claude-3-5-haiku-20241022
 gpt-5.5 · gpt-5.4-mini · gpt-5.1-codex-max · gpt-5-codex · gemini-3-pro-preview
 gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
@@ -140,6 +141,7 @@ Medido el **2026-10-15**: **3 cuentas → 3 claves, una clave por cuenta**. Cada
 ## 🧭 Cómo funciona
 
 ```
+
 inbox (one address per account)                                  a fresh address per account
    │
    ├─▶ sign-up: liangjiewis.com page → e-mail address → code / link from the inbox
@@ -199,6 +201,26 @@ node src/connect-9router.js --base http://localhost:20128 --password 123456
 ```
 
 Cada clave de `keys.txt` se convierte en una conexión del nodo de proveedor `liangjiewis` (`--api-key <key>` registra una sola clave en su lugar, `--model <id>` sobrescribe el valor por defecto). Después elige un modelo dentro de 9Router:
+
+```
+liangjiewis/claude-3-5-haiku-20241022
+liangjiewis/claude-opus-5
+liangjiewis/gpt-5.5
+```
+
+Valores por defecto: `--base http://localhost:20128`, `--password 123456`, `--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`, modelo por defecto `claude-3-5-haiku-20241022`.
+
+## 🔌 Conectar con OmniRoute
+
+[OmniRoute](https://omniroute.online) es un router autoalojado y compatible con OpenAI. liangjiewis.com es compatible con OpenAI, así que regístralo una vez y usa todas las claves:
+
+```bash
+node src/connect-omniroute.js --base http://localhost:20128 --password 123456
+
+# or: node src/cli.js mint --count 3 --connect-omniroute
+```
+
+Cada clave de `keys.txt` se convierte en una conexión del nodo de proveedor `liangjiewis` (`--api-key <key>` registra una sola clave en su lugar, `--model <id>` sobrescribe el valor por defecto). Después elige un modelo dentro de OmniRoute:
 
 ```
 liangjiewis/claude-3-5-haiku-20241022

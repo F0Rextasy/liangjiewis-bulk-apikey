@@ -1,6 +1,6 @@
 <div align="center">
-
 ```
+
 ██╗     ██╗ █████╗ ███╗   ██╗ ██████╗      ██╗██╗███████╗██╗    ██╗██╗███████╗
 ██║     ██║██╔══██╗████╗  ██║██╔════╝      ██║██║██╔════╝██║    ██║██║██╔════╝
 ██║     ██║███████║██╔██╗ ██║██║  ███╗     ██║██║█████╗  ██║ █╗ ██║██║███████╗
@@ -10,7 +10,6 @@
 ```
 
 # liangjiewis-bulk-apikey
-
 **Массовое создание аккаунтов liangjiewis.com с автоматически сгенерированными API-ключами — OpenAI-совместимый инференс (Claude, GPT, Gemini, DeepSeek, GLM, Qwen) + коннектор 9Router.**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
@@ -18,9 +17,10 @@
 [![License](https://img.shields.io/badge/license-MIT-6ea8fe?style=for-the-badge)](LICENSE)
 [![Models](https://img.shields.io/badge/models-97%20served-412991?style=for-the-badge)](https://liangjiewis.com)
 [![9Router](https://img.shields.io/badge/9Router-connector-8B5CF6?style=for-the-badge)](#-connect-to-9router)
+[![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Быстрый старт](#-quick-start) · [🎁 Бесплатный тариф](#-free-tier--how-much-you-get) · [🤖 Модели](#-models--all-97-of-them) · [🧪 Использование API](#-how-to-use-the-api) · [✅ Проверено](#-verified-working--every-key-is-tested) · [🧭 Как это работает](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Параметры](#️-cli-options) · [🛰️ Прокси](#️-behind-a-proxy) · [🐞 Проблемы](#-issues)
+[🛠 Быстрый старт](#-quick-start) · [🎁 Бесплатный тариф](#-free-tier--how-much-you-get) · [🤖 Модели](#-models--all-97-of-them) · [🧪 Использование API](#-how-to-use-the-api) · [✅ Проверено](#-verified-working--every-key-is-tested) · [🧭 Как это работает](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Параметры](#️-cli-options) · [🛰️ Прокси](#️-behind-a-proxy) · [🐞 Проблемы](#-issues)
 
 </div>
 
@@ -61,6 +61,7 @@ node src/cli.js verify                 # every key in keys.txt is re-tested agai
 `GET https://liangjiewis.com/v1/models` возвращает **97 идентификаторов моделей** для созданного ключа, например:
 
 ```
+
 claude-opus-5 · claude-sonnet-5 · claude-haiku-4-5-20251001 · claude-3-5-haiku-20241022
 gpt-5.5 · gpt-5.4-mini · gpt-5.1-codex-max · gpt-5-codex · gemini-3-pro-preview
 gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
@@ -140,6 +141,7 @@ node src/launcher.js
 ## 🧭 Как это работает
 
 ```
+
 inbox (one address per account)                                  a fresh address per account
    │
    ├─▶ sign-up: liangjiewis.com page → e-mail address → code / link from the inbox
@@ -199,6 +201,26 @@ node src/connect-9router.js --base http://localhost:20128 --password 123456
 ```
 
 Каждый ключ в `keys.txt` становится одним подключением узла провайдера `liangjiewis` (`--api-key <key>` регистрирует вместо этого один ключ, `--model <id>` переопределяет модель по умолчанию). Затем выберите модель внутри 9Router:
+
+```
+liangjiewis/claude-3-5-haiku-20241022
+liangjiewis/claude-opus-5
+liangjiewis/gpt-5.5
+```
+
+Значения по умолчанию: `--base http://localhost:20128`, `--password 123456`, `--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`, модель по умолчанию `claude-3-5-haiku-20241022`.
+
+## 🔌 Подключение к OmniRoute
+
+[OmniRoute](https://omniroute.online) — это самостоятельно размещаемый OpenAI-совместимый роутер. liangjiewis.com OpenAI-совместим, поэтому зарегистрируйте его один раз и используйте каждый ключ:
+
+```bash
+node src/connect-omniroute.js --base http://localhost:20128 --password 123456
+
+# or: node src/cli.js mint --count 3 --connect-omniroute
+```
+
+Каждый ключ в `keys.txt` становится одним подключением узла провайдера `liangjiewis` (`--api-key <key>` регистрирует вместо этого один ключ, `--model <id>` переопределяет модель по умолчанию). Затем выберите модель внутри OmniRoute:
 
 ```
 liangjiewis/claude-3-5-haiku-20241022

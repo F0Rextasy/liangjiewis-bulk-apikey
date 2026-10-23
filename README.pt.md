@@ -1,6 +1,6 @@
 <div align="center">
-
 ```
+
 ██╗     ██╗ █████╗ ███╗   ██╗ ██████╗      ██╗██╗███████╗██╗    ██╗██╗███████╗
 ██║     ██║██╔══██╗████╗  ██║██╔════╝      ██║██║██╔════╝██║    ██║██║██╔════╝
 ██║     ██║███████║██╔██╗ ██║██║  ███╗     ██║██║█████╗  ██║ █╗ ██║██║███████╗
@@ -10,7 +10,6 @@
 ```
 
 # liangjiewis-bulk-apikey
-
 **Crie contas em massa no liangjiewis.com com chaves de API geradas automaticamente — inferência compatível com OpenAI (Claude, GPT, Gemini, DeepSeek, GLM, Qwen) + conector 9Router.**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
@@ -18,9 +17,10 @@
 [![Licença](https://img.shields.io/badge/license-MIT-6ea8fe?style=for-the-badge)](LICENSE)
 [![Modelos](https://img.shields.io/badge/models-97%20served-412991?style=for-the-badge)](https://liangjiewis.com)
 [![9Router](https://img.shields.io/badge/9Router-connector-8B5CF6?style=for-the-badge)](#-connect-to-9router)
+[![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Início rápido](#-quick-start) · [🎁 Nível gratuito](#-free-tier--how-much-you-get) · [🤖 Modelos](#-models--all-97-of-them) · [🧪 Usar a API](#-how-to-use-the-api) · [✅ Verificado](#-verified-working--every-key-is-tested) · [🧭 Como funciona](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Opções](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Problemas](#-issues)
+[🛠 Início rápido](#-quick-start) · [🎁 Nível gratuito](#-free-tier--how-much-you-get) · [🤖 Modelos](#-models--all-97-of-them) · [🧪 Usar a API](#-how-to-use-the-api) · [✅ Verificado](#-verified-working--every-key-is-tested) · [🧭 Como funciona](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Opções](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Problemas](#-issues)
 
 </div>
 
@@ -61,6 +61,7 @@ node src/cli.js verify                 # every key in keys.txt is re-tested agai
 `GET https://liangjiewis.com/v1/models` retorna **97 ids de modelo** para uma chave gerada, por exemplo:
 
 ```
+
 claude-opus-5 · claude-sonnet-5 · claude-haiku-4-5-20251001 · claude-3-5-haiku-20241022
 gpt-5.5 · gpt-5.4-mini · gpt-5.1-codex-max · gpt-5-codex · gemini-3-pro-preview
 gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
@@ -140,6 +141,7 @@ Medido em **2026-10-15**: **3 contas → 3 chaves, uma chave por conta**. Cada c
 ## 🧭 Como funciona
 
 ```
+
 inbox (one address per account)                                  a fresh address per account
    │
    ├─▶ sign-up: liangjiewis.com page → e-mail address → code / link from the inbox
@@ -199,6 +201,26 @@ node src/connect-9router.js --base http://localhost:20128 --password 123456
 ```
 
 Cada chave em `keys.txt` se torna uma conexão do nó provedor `liangjiewis` (`--api-key <key>` registra uma única chave, `--model <id>` substitui o padrão). Depois, escolha um modelo dentro do 9Router:
+
+```
+liangjiewis/claude-3-5-haiku-20241022
+liangjiewis/claude-opus-5
+liangjiewis/gpt-5.5
+```
+
+Padrões: `--base http://localhost:20128`, `--password 123456`, `--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`, modelo padrão `claude-3-5-haiku-20241022`.
+
+## 🔌 Conectar ao OmniRoute
+
+[OmniRoute](https://omniroute.online) é um roteador auto-hospedado e compatível com OpenAI. O liangjiewis.com é compatível com OpenAI, então registre-o uma vez e use todas as chaves:
+
+```bash
+node src/connect-omniroute.js --base http://localhost:20128 --password 123456
+
+# or: node src/cli.js mint --count 3 --connect-omniroute
+```
+
+Cada chave em `keys.txt` se torna uma conexão do nó provedor `liangjiewis` (`--api-key <key>` registra uma única chave, `--model <id>` substitui o padrão). Depois, escolha um modelo dentro do OmniRoute:
 
 ```
 liangjiewis/claude-3-5-haiku-20241022

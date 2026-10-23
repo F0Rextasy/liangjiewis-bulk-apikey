@@ -1,6 +1,6 @@
 <div align="center">
-
 ```
+
 ██╗     ██╗ █████╗ ███╗   ██╗ ██████╗      ██╗██╗███████╗██╗    ██╗██╗███████╗
 ██║     ██║██╔══██╗████╗  ██║██╔════╝      ██║██║██╔════╝██║    ██║██║██╔════╝
 ██║     ██║███████║██╔██╗ ██║██║  ███╗     ██║██║█████╗  ██║ █╗ ██║██║███████╗
@@ -10,7 +10,6 @@
 ```
 
 # liangjiewis-bulk-apikey
-
 **批量创建 liangjiewis.com 账户并自动生成 API 密钥——兼容 OpenAI 的推理服务（Claude、GPT、Gemini、DeepSeek、GLM、Qwen）+ 9Router 连接器。**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
@@ -18,9 +17,10 @@
 [![License](https://img.shields.io/badge/license-MIT-6ea8fe?style=for-the-badge)](LICENSE)
 [![Models](https://img.shields.io/badge/models-97%20served-412991?style=for-the-badge)](https://liangjiewis.com)
 [![9Router](https://img.shields.io/badge/9Router-connector-8B5CF6?style=for-the-badge)](#-connect-to-9router)
+[![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-97-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
+[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-97-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
 
 </div>
 
@@ -61,6 +61,7 @@ node src/cli.js verify                 # every key in keys.txt is re-tested agai
 `GET https://liangjiewis.com/v1/models` 对生成的密钥返回 **97 个模型 ID**，例如：
 
 ```
+
 claude-opus-5 · claude-sonnet-5 · claude-haiku-4-5-20251001 · claude-3-5-haiku-20241022
 gpt-5.5 · gpt-5.4-mini · gpt-5.1-codex-max · gpt-5-codex · gemini-3-pro-preview
 gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
@@ -140,6 +141,7 @@ node src/launcher.js
 ## 🧭 工作原理
 
 ```
+
 inbox (one address per account)                                  a fresh address per account
    │
    ├─▶ sign-up: liangjiewis.com page → e-mail address → code / link from the inbox
@@ -199,6 +201,26 @@ node src/connect-9router.js --base http://localhost:20128 --password 123456
 ```
 
 `keys.txt` 中的每个密钥都会成为 `liangjiewis` 提供商节点的一个连接（`--api-key <key>` 改为注册单个密钥，`--model <id>` 覆盖默认值）。然后在 9Router 内选择一个模型：
+
+```
+liangjiewis/claude-3-5-haiku-20241022
+liangjiewis/claude-opus-5
+liangjiewis/gpt-5.5
+```
+
+默认值：`--base http://localhost:20128`、`--password 123456`、`--prefix liangjiewis`、`--base-url https://liangjiewis.com/v1`，默认模型 `claude-3-5-haiku-20241022`。
+
+## 🔌 连接到 OmniRoute
+
+[OmniRoute](https://omniroute.online) 是一个自托管、兼容 OpenAI 的路由器。liangjiewis.com 兼容 OpenAI，因此注册一次即可使用所有密钥：
+
+```bash
+node src/connect-omniroute.js --base http://localhost:20128 --password 123456
+
+# or: node src/cli.js mint --count 3 --connect-omniroute
+```
+
+`keys.txt` 中的每个密钥都会成为 `liangjiewis` 提供商节点的一个连接（`--api-key <key>` 改为注册单个密钥，`--model <id>` 覆盖默认值）。然后在 OmniRoute 内选择一个模型：
 
 ```
 liangjiewis/claude-3-5-haiku-20241022

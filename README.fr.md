@@ -1,5 +1,4 @@
 <div align="center">
-
 ```
 ██╗     ██╗ █████╗ ███╗   ██╗ ██████╗      ██╗██╗███████╗██╗    ██╗██╗███████╗
 ██║     ██║██╔══██╗████╗  ██║██╔════╝      ██║██║██╔════╝██║    ██║██║██╔════╝
@@ -18,9 +17,10 @@
 [![License](https://img.shields.io/badge/license-MIT-6ea8fe?style=for-the-badge)](LICENSE)
 [![Models](https://img.shields.io/badge/models-97%20served-412991?style=for-the-badge)](https://liangjiewis.com)
 [![9Router](https://img.shields.io/badge/9Router-connector-8B5CF6?style=for-the-badge)](#-connect-to-9router)
+[![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-97-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
+[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-97-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
 
 </div>
 
@@ -61,6 +61,7 @@ node src/cli.js verify                 # chaque clé dans keys.txt est retestée
 `GET https://liangjiewis.com/v1/models` renvoie **97 identifiants de modèle** pour une clé créée, par exemple :
 
 ```
+
 claude-opus-5 · claude-sonnet-5 · claude-haiku-4-5-20251001 · claude-3-5-haiku-20241022
 gpt-5.5 · gpt-5.4-mini · gpt-5.1-codex-max · gpt-5-codex · gemini-3-pro-preview
 gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
@@ -140,6 +141,7 @@ Mesuré le **15‑10‑2026** : **3 comptes → 3 clés, une clé par compte**
 ## 🧭 How it works
 
 ```
+
 inbox (one address per account)                                  a fresh address per account
    │
    ├─▶ sign-up: liangjiewis.com page → e-mail address → code / link from the inbox
@@ -198,7 +200,7 @@ node src/connect-9router.js --base http://localhost:20128 --password 123456
 # or: node src/cli.js mint --count 3 --connect-9router
 ```
 
-Chaque clé de `keys.txt` devient une connexion du nœud fournisseur `liangjiewis` (`--api-key <key>` enregistre une seule clé à la place, `--model <id>` surcharge le défaut). Puis choisissez un modèle dans 9Router :
+Chaque clé de `keys.txt` devient une connexion du nœud fournisseur `liangjiewis` (`--api-key <key>` enregistre une seule clé à la place, `--model <id>` surcharge le défaut). Puis choisissez un modèle dans 9Router :
 
 ```
 liangjiewis/claude-3-5-haiku-20241022
@@ -206,7 +208,27 @@ liangjiewis/claude-opus-5
 liangjiewis/gpt-5.5
 ```
 
-Valeurs par défaut : `--base http://localhost:20128`, `--password 123456`, `--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`, modèle par défaut `claude-3-5-haiku-20241022`.
+Valeurs par défaut : `--base http://localhost:20128`, `--password 123456`, `--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`, modèle par défaut `claude-3-5-haiku-20241022`.
+
+## 🔌 Connect to OmniRoute
+
+[OmniRoute](https://omniroute.online) est un routeur auto‑hébergé compatible OpenAI. liangjiewis.com est compatible OpenAI, donc enregistrez‑le une fois et utilisez chaque clé :
+
+```bash
+node src/connect-omniroute.js --base http://localhost:20128 --password 123456
+
+# or: node src/cli.js mint --count 3 --connect-omniroute
+```
+
+Chaque clé de `keys.txt` devient une connexion du nœud fournisseur `liangjiewis` (`--api-key <key>` enregistre une seule clé à la place, `--model <id>` surcharge le défaut). Puis choisissez un modèle dans OmniRoute :
+
+```
+liangjiewis/claude-3-5-haiku-20241022
+liangjiewis/claude-opus-5
+liangjiewis/gpt-5.5
+```
+
+Valeurs par défaut : `--base http://localhost:20128`, `--password 123456`, `--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`, modèle par défaut `claude-3-5-haiku-20241022`.
 
 ## 🔑 What one key gets you
 

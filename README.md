@@ -21,7 +21,7 @@
 [![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-97-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
+[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-97-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
 
 </div>
 
@@ -200,16 +200,30 @@ All code lives in `src/` — run it from the repository root as `node src/<file>
 ```bash
 node src/connect-9router.js --base http://localhost:20128 --password 123456
 
+# or: node src/cli.js mint --count 3 --connect-9router
+```
+
+Every key in `keys.txt` becomes one connection of the `liangjiewis` provider node (`--api-key <key>` registers a single key instead, `--model <id>` overrides the default). Then pick a model inside 9Router:
+
+```
+liangjiewis/claude-3-5-haiku-20241022
+liangjiewis/claude-opus-5
+liangjiewis/gpt-5.5
+```
+
+Defaults: `--base http://localhost:20128`, `--password 123456`, `--prefix liangjiewis`, `--base-url https://liangjiewis.com/v1`, default model `claude-3-5-haiku-20241022`.
+
 ## 🔌 Connect to OmniRoute
 
 [OmniRoute](https://omniroute.online) is a self-hosted, OpenAI-compatible router. liangjiewis.com is OpenAI-compatible, so register it once and use every key:
 
 ```bash
 node src/connect-omniroute.js --base http://localhost:20128 --password 123456
-# or: node src/cli.js mint --count 3 --connect-9router
+
+# or: node src/cli.js mint --count 3 --connect-omniroute
 ```
 
-Every key in `keys.txt` becomes one connection of the `liangjiewis` provider node (`--api-key <key>` registers a single key instead, `--model <id>` overrides the default). Then pick a model inside 9Router:
+Every key in `keys.txt` becomes one connection of the `liangjiewis` provider node (`--api-key <key>` registers a single key instead, `--model <id>` overrides the default). Then pick a model inside OmniRoute:
 
 ```
 liangjiewis/claude-3-5-haiku-20241022

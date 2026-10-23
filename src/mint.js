@@ -78,7 +78,7 @@ if (has('help') || has('-h') || argv.includes('-h')) {
   process.exit(0);
 }
 
-const FLAGS = ['--count', '--pool', '--mail', '--imap-user', '--imap-pass', '--mail-address', '--base', '--model', '--sender', '--preset', '--conc', '--gap', '--poll-ms', '--code-wait', '--max-cycle', '--scan', '--scan-conc', '--budget'];
+const FLAGS = ['--count', '--pool', '--mail', '--imap-user', '--imap-pass', '--mail-address', '--base', '--model', '--sender', '--preset', '--conc', '--gap', '--poll-ms', '--code-wait', '--max-cycle', '--scan', '--scan-conc', '--budget', '--auto'];
 for (const a of argv) {
   // `--preset=turbo` (and the same form for --conc/--gap) is accepted too.
   if (a.startsWith('-') && !FLAGS.includes(a) && !['--preset', '--conc', '--gap'].includes(a.split('=')[0])) {

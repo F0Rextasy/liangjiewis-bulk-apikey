@@ -47,6 +47,7 @@ const ROOT = path.resolve(__dirname, '..'); // the checkout root: user-facing fi
 const POOL = path.join(ROOT, 'proxies.txt');
 const ACCOUNTS = path.join(ROOT, 'accounts.json');
 const KEYS = path.join(ROOT, 'keys.txt');
+const KEYS_DEAD = path.join(ROOT, 'keys-dead.txt');
 const MODELS_FILE = path.join(ROOT, 'models.json');
 const OUT = path.join(ROOT, 'out');
 
@@ -81,7 +82,7 @@ if (has('help') || has('-h') || argv.includes('-h')) {
   process.exit(0);
 }
 
-const FLAGS = ['--key', '--all', '--model', '--max-tokens', '--want', '--pool', '--base'];
+const FLAGS = ['--key', '--all', '--model', '--max-tokens', '--want', '--pool', '--base', '--auto'];
 for (const a of argv) {
   if (a.startsWith('-') && !FLAGS.includes(a)) {
     console.error(`unknown flag: ${a}\n`);
@@ -385,6 +386,16 @@ async function measure(rec, cursor) {
   }
   if (accounts.length) writeJson(ACCOUNTS, accounts);
 
+  // A key the panel refuses outright is dead: it leaves keys.txt and is parked in
+  // keys-dead.txt. "quota", "authentic" and "error" (an exit problem) are not
+  // dead — those stay in the file for the next run.
+  const deadRecs = results.filter((r) => r.verdict === 'account_banned' || r.verdict === 'key_refused');
+  const deadKeys = deadRecs.map((r) => r.key);
+  if (deadKeys.length) {
+    for (const r of deadRecs) if (!fs.existsSync(KEYS_DEAD) || !fs.readFileSync(KEYS_DEAD, 'utf8').includes(r.key)) appendLine(KEYS_DEAD, `${r.key}\t${r.verdict}\t${nowIso()}`);
+    const live = (fs.existsSync(KEYS) ? fs.readFileSync(KEYS, 'utf8').split(/\r?\n/) : []).map((l) => l.trim()).filter((l) => l && !deadKeys.includes(l));
+    fs.writeFileSync(KEYS, live.length ? live.join('\n') + '\n' : '');
+  }
   const ok = results.filter((r) => r.models && r.models.status === 200).length;
   const spendable = results.filter((r) => r.verdict === 'ok').length;
   const authentic = results.filter((r) => r.verdict === 'authentic').length;
@@ -398,6 +409,7 @@ async function measure(rec, cursor) {
   if (quota) parts.push(`${quota} out of credit`);
   if (accountBanned) parts.push(`${accountBanned} account(s) banned by the panel (auth.user_banned)`);
   if (refused) parts.push(`${refused} key(s) refused`);
+  if (deadKeys.length) parts.push(`${deadKeys.length} dead key(s) → keys-dead.txt (out of keys.txt)`);
   if (unmeasured) parts.push(`${unmeasured} unmeasured`);
   const tail = unmeasured ? ' — re-run to measure them (unmeasured is not dead)' : '';
   log(`done: liangjiewis — ${parts.join(' · ')}${tail}`);

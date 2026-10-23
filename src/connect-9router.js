@@ -13,7 +13,7 @@
  * Usage:
  *   node src/connect-9router.js \
  *     --base http://localhost:20128 --password 123456 \
- *     --api-key sk-xxxx [--name "liangjiewis.com"] [--prefix liangjiewis]
+ *     --api-key liangjiewis_xxxx [--name "liangjiewis.com"] [--prefix liangjiewis]
  *
  *   node src/connect-9router.js                  # register every key in keys.txt
  *   node src/connect-9router.js --model <id>     # pin the connection's default model
@@ -25,7 +25,7 @@
  *   --name <name>      provider-node name       (default liangjiewis.com)
  *   --prefix <slug>    provider prefix in 9Router (default liangjiewis)
  *   --base-url <url>   provider base URL        (default https://liangjiewis.com/v1)
- *   --model <id>       connection default model (default claude-3-5-haiku-20241022)
+ *   --model <id>       connection default model (default: provider's default model)
  *
  * Zero dependencies. Node.js >= 18.
  */
@@ -33,20 +33,19 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..'); // the checkout root: keys.txt lives here
-const UA = 'liangjiewis-bulk-9router-connector/1.0';
+const UA = 'liangjiewis-bulk-9router-connector/1.0'
 
 const DEFAULTS = {
   base: 'http://localhost:20128',
   password: '123456',
-  name: 'liangjiewis.com',
-  prefix: 'liangjiewis',
-  baseUrl: 'https://liangjiewis.com/v1',
-  defaultModel: 'claude-3-5-haiku-20241022',
+  name: "liangjiewis.com",
+  prefix: "liangjiewis",
+  baseUrl: "https://liangjiewis.com/v1",
+  defaultModel: "claude-3-5-haiku-20241022",
 };
 
 /** Model ids a fresh key lists, as routed under `<prefix>/…` by 9Router. */
-const MODELS = ['claude-3-5-haiku-20241022', 'claude-opus-5', 'gpt-5.5'];
+const MODELS = ["claude-3-5-haiku-20241022","claude-opus-5","gpt-5.5"];
 
 async function login9router(base, password) {
   const res = await fetch(`${base}/api/auth/login`, {
@@ -54,11 +53,7 @@ async function login9router(base, password) {
     headers: { 'Content-Type': 'application/json', 'User-Agent': UA },
     body: JSON.stringify({ password: password ?? DEFAULTS.password }),
   });
-  // `getSetCookie()` is undici ≥ 5.19 (Node ≥ 18.14) and package.json promises
-  // Node >= 18: on 18.0–18.13 the jar stayed empty while the login still said
-  // `ok`, and every call after it answered 401.
-  const raw = res.headers.get('set-cookie');
-  const sc = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : raw ? raw.split(/,(?=[^;,]+=)/) : [];
+  const sc = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : [];
   const cookie = sc.map((c) => c.split(';')[0]).join('; ');
   return { ok: res.ok, cookie, body: (await res.text()).slice(0, 200) };
 }
@@ -150,13 +145,9 @@ async function connect9Router(opts = {}) {
   return connection;
 }
 
-/** `keys.txt` at the checkout root (the layout the README documents). */
+/** `keys.txt` at the checkout root (beside `src/`) — the layout the tools run in. */
 function defaultKeysFile() {
-  const atRoot = path.join(ROOT, 'keys.txt');
-  if (fs.existsSync(atRoot)) return atRoot;
-  const beside = path.join(__dirname, 'keys.txt');
-  if (fs.existsSync(beside)) return beside;
-  return atRoot;
+  return path.join(__dirname, '..', 'keys.txt');
 }
 
 function readKeys(keysFile = defaultKeysFile()) {

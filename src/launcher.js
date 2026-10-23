@@ -2,8 +2,15 @@
 'use strict';
 
 /**
- * Interactive launcher for liangjiewis-bulk-apikey — a menu over the task modules.
- * Settings persist in launcher.config.json at the checkout root.
+ * Interactive launcher for the compiled build.
+ *
+ * The CLI's options stay configurable without reading its source: this launcher
+ * asks for them, remembers the answers in `launcher.config.json`, and then runs
+ * the CLI with the right flags — including the proxy list, which is the setting
+ * people most often need and cannot guess.
+ *
+ * Usage: node src/launcher.js            (menu)
+ *        node src/launcher.js --help
  */
 
 const fs = require('fs');
@@ -11,139 +18,174 @@ const path = require('path');
 const readline = require('readline');
 const { spawnSync } = require('child_process');
 
-const HERE = __dirname; // the src/ folder — the task modules spawn from here
-const ROOT = path.resolve(__dirname, '..'); // the checkout root: user-facing files live here
+const ROOT = path.resolve(__dirname, '..');
 const CONFIG = path.join(ROOT, 'launcher.config.json');
-const POOL = path.join(ROOT, 'proxies.txt');
-const KEYS = path.join(ROOT, 'keys.txt');
+const CLI = path.join(__dirname, 'cli.js');
 
-const defaults = { count: 3, conc: 8 };
-let cfg = { ...defaults };
-try { Object.assign(cfg, JSON.parse(fs.readFileSync(CONFIG, 'utf8'))); } catch (e) {}
-const save = () => fs.writeFileSync(CONFIG, JSON.stringify(cfg, null, 2) + '\n');
-// kept in sync with args.json — mint reads --count / --scan-conc, verify is flagless
-const ARGS = {"mint":["--count","count","--scan-conc","conc"],"verify":[]};
+const defaults = {
+  count: 50,
+  proxyFile: process.env['LIANGJIEWIS_PROXIES'] || 'proxies.txt',
+  model: "claude-3-5-haiku-20241022",
+  routerBase: 'http://localhost:20128',
+  routerPassword: '123456',
+};
+
+function loadConfig() {
+  try {
+    return { ...defaults, ...JSON.parse(fs.readFileSync(CONFIG, 'utf8')) };
+  } catch (e) {
+    return { ...defaults };
+  }
+}
+
+function saveConfig(cfg) {
+  try {
+    fs.writeFileSync(CONFIG, JSON.stringify(cfg, null, 2) + '\n');
+  } catch (e) {
+    console.error(`  ! could not write ${path.basename(CONFIG)}: ${e.message}`);
+  }
+}
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const ask = (q, fb) => new Promise((r) => rl.question(q + (fb !== undefined ? ' [' + fb + ']' : '') + ': ', (a) => r(String(a).trim() || fb)));
+const ask = (question, fallback) =>
+  new Promise((resolve) => {
+    const hint = fallback ? ` [${String(fallback).slice(0, 30)}${String(fallback).length > 30 ? '…' : ''}]` : '';
+    rl.question(`  ${question}${hint}: `, (answer) => resolve(answer.trim() || fallback || ''));
+  });
 
-const LOGO = String.raw`
+function run(args, env = {}) {
+  console.log('');
+  const res = spawnSync(process.execPath, [CLI, ...args], {
+    windowsHide: true,
+    cwd: ROOT,
+    stdio: 'inherit',
+    env: { ...process.env, ...env },
+  });
+  if (res.status !== 0) console.log(`  ! exited with code ${res.status}`);
+}
+
+const BANNER_LOGO = String.raw`
 ██╗     ██╗ █████╗ ███╗   ██╗ ██████╗      ██╗██╗███████╗██╗    ██╗██╗███████╗
 ██║     ██║██╔══██╗████╗  ██║██╔════╝      ██║██║██╔════╝██║    ██║██║██╔════╝
 ██║     ██║███████║██╔██╗ ██║██║  ███╗     ██║██║█████╗  ██║ █╗ ██║██║███████╗
 ██║     ██║██╔══██║██║╚██╗██║██║   ██║██   ██║██║██╔══╝  ██║███╗██║██║╚════██║
 ███████╗██║██║  ██║██║ ╚████║╚██████╔╝╚█████╔╝██║███████╗╚███╔███╔╝██║███████║
-╚══════╝╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚════╝ ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝╚══════╝`;
+╚══════╝╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚════╝ ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝╚══════╝
+`;
 
 function banner() {
-  const lines = [
-    'liangjiewis-bulk-apikey  ·  one 量界智算 account per key',
-    '97 models listed · keys verified live; inference needs an account top-up',
-    'open source · MIT · liangjiewis-bulk-apikey contributors',
-  ];
-  // CJK glyphs are two terminal columns wide, so the box is padded by display
-  // width, not by string length (a 4-char name is 8 columns)
-  const dw = (s) => [...s].reduce((n, c) => n + (/[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]/.test(c) ? 2 : 1), 0);
-  const w = Math.max(...lines.map(dw));
-  console.log(LOGO);
-  console.log('  ┌' + '─'.repeat(w + 2) + '┐');
-  for (const line of lines) console.log('  │ ' + line + ' '.repeat(w - dw(line)) + ' │');
-  console.log('  └' + '─'.repeat(w + 2) + '┘\n');
+  const cyan = '\x1b[36m';
+  const dim = '\x1b[2m';
+  const bold = '\x1b[1m';
+  const reset = '\x1b[0m';
+  const title = 'liangjiewis-bulk-apikey';
+  const tagline = "97 models listed (Claude Opus 5, GPT-5.5, Gemini 3 Pro, O3) — keys authentic, inference credit-gated";
+  const lines = BANNER_LOGO.replace(/^\n/, '').replace(/\n$/, '').split('\n');
+  const width = Math.max(...lines.map((l) => [...l].length), [...title].length, [...tagline].length);
+  const pad = (s) => s + ' '.repeat(width - [...s].length);
+  const inner = width + 4;
+  console.log('');
+  console.log(`${cyan}╔${'═'.repeat(inner)}╗${reset}`);
+  console.log(`${cyan}║${' '.repeat(inner)}║${reset}`);
+  for (const line of lines) console.log(`${cyan}║${reset}  ${bold}${pad(line)}${reset}  ${cyan}║${reset}`);
+  console.log(`${cyan}║${' '.repeat(inner)}║${reset}`);
+  console.log(`${cyan}║${reset}  ${pad(title)}  ${cyan}║${reset}`);
+  console.log(`${cyan}║${reset}  ${dim}${pad(tagline)}${reset}  ${cyan}║${reset}`);
+  console.log(`${cyan}║${' '.repeat(inner)}║${reset}`);
+  console.log(`${cyan}╚${'═'.repeat(inner)}╝${reset}`);
+  console.log(`  ${dim}liangjiewis-bulk-apikey contributors${reset}`);
+  console.log('');
 }
 
-const count = (f) => { try { return fs.readFileSync(f, 'utf8').split(/\r?\n/).filter((l) => l.trim() && !l.trim().startsWith('#')).length; } catch (e) { return 0; } };
+async function mintFlow(cfg) {
+  cfg.count = parseInt(await ask('How many accounts/keys do you want (any number)', cfg.count), 10) || cfg.count;
+  cfg.proxyFile = await ask('Proxy list file (one proxy per line)', cfg.proxyFile);
+  cfg.model = await ask('Model used for the live verification', cfg.model);
+  saveConfig(cfg);
 
-function run(args) {
-  console.log('\n▶ node src/' + args.join(' ') + '\n');
-  const r = spawnSync(process.execPath, args, { windowsHide: true, cwd: HERE, stdio: 'inherit' });
-  if (r.status !== 0) console.log('\n⚠ exited with code ' + r.status);
+  if (!fs.existsSync(path.resolve(ROOT, cfg.proxyFile)) && !fs.existsSync(cfg.proxyFile)) {
+    console.log(`  ! ${cfg.proxyFile} not found — running WITHOUT a proxy (direct)`);
+    console.log('    (put one exit per line there to route through proxies: http://host:port, socks5://host:port or host:port)');
+  }
+  run(['--count', String(cfg.count), '--model', cfg.model], { ['LIANGJIEWIS_PROXIES']: cfg.proxyFile });
 }
 
-function argsFor(task) {
-  const spec = ARGS[task] || [];
-  return spec.map((v) => (v === 'count' ? String(cfg.count) : v === 'conc' ? String(cfg.conc) : v));
+async function verifyFlow(cfg) {
+  cfg.proxyFile = await ask('Proxy list file', cfg.proxyFile);
+  saveConfig(cfg);
+  run(['--verify-only'], { ['LIANGJIEWIS_PROXIES']: cfg.proxyFile });
 }
 
-async function settings() {
-  console.log('\nSettings');
-  console.log('  1) count      ' + cfg.count + '   (keys to mint per run)');
-  console.log('  2) conc       ' + cfg.conc + '   (exits probed in parallel per pin, max 8)');
-  console.log('  0) back');
-  const p = await ask('choose', '0');
-  if (p === '1') cfg.count = parseInt(await ask('count', cfg.count), 10) || cfg.count;
-  if (p === '2') cfg.conc = parseInt(await ask('parallel exits', cfg.conc), 10) || cfg.conc;
-  save();
+async function screenFlow(cfg) {
+  cfg.proxyFile = await ask('Proxy list file to screen', cfg.proxyFile);
+  saveConfig(cfg);
+  run(['--screen'], { ['LIANGJIEWIS_PROXIES']: cfg.proxyFile });
 }
 
-async function nineRouter() {
+async function connectFlow(cfg) {
   const { connectKeysFile, connect9Router } = require('./connect-9router.js');
-  cfg.routerBase = await ask('9Router base URL', cfg.routerBase || 'http://localhost:20128');
-  cfg.routerPassword = await ask('9Router password', cfg.routerPassword || '123456');
-  save();
+  cfg.routerBase = await ask('9Router base URL', cfg.routerBase);
+  cfg.routerPassword = await ask('9Router password', cfg.routerPassword);
+  saveConfig(cfg);
   console.log('');
   try {
     await connectKeysFile({ base: cfg.routerBase, password: cfg.routerPassword });
   } catch (e) {
     if (!/no API keys/.test(e.message)) throw e;
-    console.log('\n⚠ ' + e.message);
-    const apiKey = await ask('API key to register');
+    console.log(`  ! ${e.message}`);
+    const apiKey = await ask('Single liangjiewis.com key to register');
     if (apiKey) await connect9Router({ base: cfg.routerBase, password: cfg.routerPassword, apiKey });
   }
 }
 
-async function omniRouter() {
+async function connectFlowOmni(cfg) {
   const { connectKeysFile, connectOmniRoute } = require('./connect-omniroute.js');
-  cfg.routerBase = await ask('OmniRoute base URL', cfg.routerBase || 'http://localhost:20128');
-  cfg.routerPassword = await ask('OmniRoute password', cfg.routerPassword || '123456');
-  save();
+  cfg.routerBase = await ask('OmniRoute base URL', cfg.routerBase);
+  cfg.routerPassword = await ask('OmniRoute password', cfg.routerPassword);
+  saveConfig(cfg);
   console.log('');
   try {
     await connectKeysFile({ base: cfg.routerBase, password: cfg.routerPassword });
   } catch (e) {
     if (!/no API keys/.test(e.message)) throw e;
-    console.log('\n⚠ ' + e.message);
-    const apiKey = await ask('API key to register');
+    console.log(`  ! ${e.message}`);
+    const apiKey = await ask('Single liangjiewis.com key to register');
     if (apiKey) await connectOmniRoute({ base: cfg.routerBase, password: cfg.routerPassword, apiKey });
   }
 }
 
 async function main() {
-  if (process.argv.includes('--connect-omniroute')) {
-    await omniRouter();
+  const cfg = loadConfig();
+  if (process.argv.includes('--connect-9router')) {
+    await connectFlow(cfg);
     rl.close();
     return;
   }
 
-  process.stdout.write('\x1b[2J\x1b[H');
-  banner();
-  console.log('  proxy exits: ' + (count(POOL) || 'none — running WITHOUT a proxy (direct)') + '     keys on disk: ' + count(KEYS) + '\n');
-  console.log('  1) mint      create fresh accounts and mint one key each');
-  console.log('  2) verify    re-check keys that are already on disk');
-  console.log('  3) Settings');
-  console.log('  6) Connect to 9Router   register the keys in keys.txt with a local 9Router');
-  console.log('  7) Connect to OmniRoute   register the keys in keys.txt with a local OmniRoute');
-  console.log('  0) Exit\n');
-  const choice = await ask('choose', '1');
-  if (choice === '1') {
-    run(['mint.js', ...argsFor('mint')]);
-  }
-  else if (choice === '2') {
-    run(['verify.js', ...argsFor('verify')]);
-  }
-  else if (choice === '3') {
-    await settings();
-  }
-  else if (choice === '6') {
-    await nineRouter();
-  }
-  else if (choice === '7') {
-    await omniRouter();
-  } else {
+  if (process.argv.includes('--connect-omniroute')) {
+    await connectFlowOmni(cfg);
     rl.close();
     return;
   }
-  await ask('\npress enter for the menu', '');
-  return main();
+  banner();
+  console.log('  1) Mint keys      — create one account per key and verify each with a live chat call');
+  console.log('  2) Verify keys    — re-check every key in keys.txt with a live chat call');
+  console.log('  3) Screen proxies — test your proxy list for exits that reach liangjiewis.com');
+  console.log('  4) Settings       — show what this launcher remembers');
+  console.log('  5) Help           — CLI options and notes');
+  console.log('  6) Connect to 9Router — register the keys in keys.txt with a local 9Router');
+  console.log('  7) Connect to OmniRoute — register the keys in keys.txt with a local OmniRoute');
+  console.log('  q) Quit\n');
+  const choice = (await ask('Choose', '1')).toLowerCase();
+
+  if (choice === '1') await mintFlow(cfg);
+  else if (choice === '2') await verifyFlow(cfg);
+  else if (choice === '3') await screenFlow(cfg);
+  else if (choice === '4') console.log('\n' + JSON.stringify(cfg, null, 2));
+  else if (choice === '5') run(['--help']);
+  else if (choice === '6') await connectFlow(cfg);
+  else if (choice === '7') await connectFlowOmni(cfg);
+  rl.close();
 }
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
@@ -151,4 +193,7 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
   process.exit(0);
 }
 
-main().catch((e) => { console.error('launcher failed:', e.stack || e.message); process.exit(1); });
+main().catch((e) => {
+  console.error('[fatal]', e.message);
+  process.exit(1);
+});

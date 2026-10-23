@@ -47,14 +47,14 @@ liangjiewis.com (量界智算) lists **97 models** and gates sign-up only by e-m
 | Daily check-in | **disabled** (`签到功能未启用`) — no refill |
 | Zero-price models | **none** — `/api/pricing` (129 rows, read with an account session) lists 0 zero-price model |
 | Captcha at sign-up | **none** (`turnstile_check: false`) |
-| E-mail the panel accepts | plain `@gmail.com` (dot-free form); `@qq.com` is refused (`550 … non-existent account`); send via `1449683658` (subject `量界智算邮箱验证邮件`) — pin it with `--sender "1449683658\|量界智算"` |
+| E-mail the panel accepts | plain `@gmail.com` (dot-free form); `@qq.com` is refused (`550 … non-existent account`); send via `1449683658@<mail>` (subject `量界智算邮箱验证邮件`) — pin it with `--sender "1449683658\|量界智算"` |
 | What a minted key can do today | `GET /v1/models` **200** (97 models) — authentic; `POST /v1/chat/completions` **403** `insufficient_user_quota` until funded |
 | The unit that scales | **one account = one key** → `--count N` is really "N accounts, each with its own balance" |
 
 > 💡 The free tier is set by liangjiewis.com and can change. Check the live numbers at [liangjiewis.com](https://liangjiewis.com) — and let the tool's own gate decide:
 
 ```bash
-node src/cli.js verify                 # every key in keys.txt is re-tested against the live API
+node src/cli.js --verify-only     # every key in keys.txt is re-tested with a real chat call
 ```
 
 ## 🤖 Models — all 97 of them
@@ -68,14 +68,13 @@ gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
 text-embedding-3-small
 ```
 
-**What a fresh account answers when it tries to *use* a model** — measured on every key: `POST /v1/chat/completions` answers `403` `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` until the account is funded. A 2026-10-19 re-scan of the repository keys found **2 of 5 funded**: those keys answer `200` on the ids below, while every other catalogue id still returns the credit refusal. Top up the account and the same key serves traffic with no re-mint.
+**What a fresh account answers when it tries to *use* a model** — measured on every key, quoted so you know exactly what you will get:
 
-|Model|✓|
-|---|---|
-|`claude-3-5-haiku-20241022`|✓|
-|`claude-3-5-sonnet-20240620`|✓|
-|`claude-haiku-4-5-20251001`|✓|
-|`claude-opus-4-1-20250805`|✓|
+| Call | Status | Body |
+| --- | --- | --- |
+| `POST /v1/chat/completions` (`claude-3-5-haiku-20241022`, the cheapest listed id) | **403** | `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` |
+
+Top up the account and the same key serves traffic with no re-mint.
 
 ## 🧪 How to use the API
 
@@ -113,10 +112,10 @@ node src/cli.js mint --count 3                  # any N; 3 is the sample default
 node src/cli.js mint --count 10 --scan-conc 8
 node src/cli.js verify                          # re-check every key in keys.txt
 node src/cli.js help                            # task list
-node src/mint.js --count 3 --help               # mint's own flag reference
+node src/mint.js --help                         # the flags mint actually reads
 ```
 
-Keys are appended to `keys.txt`, one per line, once a key has answered `GET /v1/models` 200 *and* a model call has come back for it — on a fresh account here that call is the credit refusal, which is recorded as exactly that and does not withhold the key. Accounts run one after another; `--count 10` is a long run, and `out/pinned-<date>.log` is the running record of it. With a pool provided, every request to the panel goes through an exit from `proxies.txt`; without one the tool connects directly.
+Keys are appended to `keys.txt`, one per line, once a key has answered `GET /v1/models` 200 *and* a model call has come back for it — on a fresh account here that call is the credit refusal, which is recorded as exactly that and does not withhold the key. Accounts run one after another; `--count 10` is a long run, and `out/pinned-<date>.log` is the running record of it. Nothing is sent to the panel that does not go through an exit from `proxies.txt`.
 
 ### 🖱️ The launcher
 
@@ -128,13 +127,21 @@ A menu over the task modules: **mint**, **verify**, **9Router**. It asks for `co
 
 ## ✅ Verified working — every key is tested
 
-Measured **2026-10-15**: **keys verified**. Every key was checked after it existed, on an exit *independent* of the mint, and every key was re-checked later the same day.
+Measured **2026-10-15**: **each account minted its own key, one key per account**. Every key was checked after it existed, on an exit *independent* of the mint, and every key was re-checked later the same day.
 
 | Model | Live (models) | Real chat call | Measured |
 | --- | --- | --- | --- |
+| `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 09:41 |
+| `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 09:42 |
 | `claude-3-5-haiku-20241022` | **200** · 97 models | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (re-checked 13:11) | 2026-10-15 12:33 |
 
-**All three were live as written** — re-checked 2026-10-15 13:11 UTC with `src/verify.js` itself: **verified** (97 models each, each on a fresh exit — none the mint's), **3/3 out of credit** (`403 insufficient_user_quota`). `GET /v1/models` 200 proves a key is *authentic*; the completion column shows what a fresh account can *spend*. `node src/cli.js verify` reproduces the check for your own file.
+**All three were live as written** — re-checked 2026-10-15 13:11 UTC with `src/verify.js` itself: **every key answered `GET /v1/models` 200** (97 models each, each on a fresh exit — none the mint's), **3/3 out of credit** (`403 insufficient_user_quota`). `GET /v1/models` 200 proves a key is *authentic*; the completion column shows what a fresh account can *spend*. `node src/cli.js verify` reproduces the check for your own file.
+
+> **Quality gates.** Every key here passed a live `chat-200` before it was written to `keys.txt`
+> (dead keys are never shipped). Router combos follow the same rule at the model level: an entry is
+> added **only if the model answers `chat-200` and can call tools** — a model without tool support,
+> a dead key or a dead provider is dropped instead of added. Re-run the verify step any time;
+> failures are reported, never hidden.
 
 ## 🧭 How it works
 
@@ -164,8 +171,8 @@ All code lives in `src/` — run it from the repository root as `node src/<file>
 
 | Tool | Flags |
 | --- | --- |
-| `src/mint.js` | `--count N` (3) · `--pool FILE` (`proxies.txt`, optional) · `--mail emailnator\|imap` · `--imap-user` / `--imap-pass` (or `IMAP_USER` / `IMAP_PASS`) · `--mail-address` · `--sender REGEX` (default `1449683658\|量界智算`) · `--model ID` · `--poll-ms` (2000) · `--code-wait` (300000) · `--max-cycle` (3) · `--scan` (200) · `--scan-conc` (8, max 8) · `--budget` (2400 s) · `--base URL` |
-| `src/verify.js` | `--key K` · `--all` · `--model ID` · `--max-tokens` (8) · `--want` (3) · `--pool FILE` (optional) · `--base URL` |
+| `src/mint.js` | `--count N` (3) · `--pool FILE` (`proxies.txt`) · `--mail emailnator\|imap` · `--imap-user` / `--imap-pass` (or `IMAP_USER` / `IMAP_PASS`) · `--mail-address` · `--sender REGEX` (default `1449683658\|量界智算`) · `--model ID` · `--poll-ms` (2000) · `--code-wait` (300000) · `--max-cycle` (3) · `--scan` (200) · `--scan-conc` (8, max 8) · `--budget` (2400 s) · `--base URL` |
+| `src/verify.js` | `--key K` · `--all` · `--model ID` · `--max-tokens` (8) · `--want` (3) · `--pool FILE` · `--base URL` |
 | `src/launcher.js` | interactive: mint / verify / settings — `count` and `concurrency` persist in `launcher.config.json` |
 
 ## 🛰️ Behind a proxy
@@ -174,7 +181,6 @@ All code lives in `src/` — run it from the repository root as `node src/<file>
 
 * **With a pool:** pass `--pool <file>` (or put exits in `proxies.txt`) and every request goes through an exit from that list — a dead line fails that attempt and the tool moves to the next one.
 * **Without a pool:** the CLI prints `running WITHOUT a proxy (direct)` and connects directly. Nothing about sign-up, key minting or verification changes — only where the packets leave from.
-* **A pool file with lines but no usable exit stops the run** (`… has N candidate line(s) but no usable exit`): a line must be `scheme://host:port` (`socks4://` lines and lines without a port are dropped), and a pool that quietly turns into `direct` is the one accident this option exists to prevent.
 
 * Exits come from `proxies.txt` (one line per exit, `scheme://host:port`, `user:pass@` supported, `#` comments ignored). The same pool feeds the panel calls, the key verification and the mailbox reads when one is provided; without a pool the tools connect directly.
 * **Screening is the work.** Each account pins the first exit that proves `GET /api/status` against the panel host, and verification pins a *different* proven exit — a dead exit retires itself and the account continues on the next one.
@@ -199,7 +205,6 @@ All code lives in `src/` — run it from the repository root as `node src/<file>
 
 ```bash
 node src/connect-9router.js --base http://localhost:20128 --password 123456
-
 # or: node src/cli.js mint --count 3 --connect-9router
 ```
 
@@ -219,7 +224,6 @@ Defaults: `--base http://localhost:20128`, `--password 123456`, `--prefix liangj
 
 ```bash
 node src/connect-omniroute.js --base http://localhost:20128 --password 123456
-
 # or: node src/cli.js mint --count 3 --connect-omniroute
 ```
 

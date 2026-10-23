@@ -1,12 +1,11 @@
 {
   "name": "liangjiewis-bulk-apikey",
   "version": "1.0.0",
-  "description": "Bulk-create liangjiewis.com accounts with auto-generated API keys — OpenAI-compatible inference + 9Router connector.",
+  "description": "Bulk-create liangjiewis.com accounts with auto-generated API keys — OpenAI-compatible inference (Claude, GPT, Gemini, DeepSeek, GLM, Qwen) + 9Router connector.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
     "liangjiewis-bulk-apikey": "src/cli.js",
-    "liangjiewis-bulk-apikey-9router": "src/connect-9router.js",
     "liangjiewis-bulk-apikey-launcher": "src/launcher.js"
   },
   "main": "src/cli.js",
@@ -25,26 +24,10 @@
     "register",
     "launcher",
     "liangjiewis",
-    "apikey",
-    "9router",
-    "openai-compatible"
+    "apikey"
   ],
   "files": [
-    "src/cdp.js",
-    "src/chrome-flags.js",
-    "src/cli.js",
-    "src/emailnator.js",
-    "src/imap.js",
-    "src/launcher.js",
-    "src/lib.js",
-    "src/mailbox-imap.js",
-    "src/mint-newapi-pinned.js",
-    "src/mint.js",
-    "src/newapi.js",
-    "src/provider-cli.js",
-    "src/proxy.js",
-    "src/verify.js",
-    "src/connect-9router.js",
+    "src",
     "README.md",
     "LICENSE"
   ]

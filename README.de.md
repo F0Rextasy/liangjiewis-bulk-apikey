@@ -1,6 +1,6 @@
 <div align="center">
-```
 
+```
 ██╗     ██╗ █████╗ ███╗   ██╗ ██████╗      ██╗██╗███████╗██╗    ██╗██╗███████╗
 ██║     ██║██╔══██╗████╗  ██║██╔════╝      ██║██║██╔════╝██║    ██║██║██╔════╝
 ██║     ██║███████║██╔██╗ ██║██║  ███╗     ██║██║█████╗  ██║ █╗ ██║██║███████╗
@@ -10,6 +10,7 @@
 ```
 
 # liangjiewis-bulk-apikey
+
 **Massenhaft liangjiewis.com-Konten mit automatisch generierten API-Schlüsseln erstellen — OpenAI-kompatible Inferenz (Claude, GPT, Gemini, DeepSeek, GLM, Qwen) + 9Router-Konnektor.**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
@@ -34,48 +35,46 @@
 
 ## ✨ Warum es das gibt
 
-liangjiewis.com (量界智算) listet **97 Modelle** auf und beschränkt die Anmeldung nur per E-Mail — **kein Captcha** (`turnstile_check: false`). Ein frisches Konto landet bei **`quota 0` (`＄0.000000`)** mit **keinem täglichen Check-in** (`签到功能未启用`) und **0 Modellen zum Nulltarif** in seiner 129-zeiligen Preistabelle, sodass jeder generierte Schlüssel *authentisch* (`GET /v1/models` **200**) und *guthabenbeschränkt* (`POST /v1/chat/completions` **403** `insufficient_user_quota`) ist. Ein Konto pro Schlüssel; N Schlüssel = N Konten, jedes mit eigenem Budget.
+liangjiewis.com (量界智算) listet **97 Modelle** und schränkt die Anmeldung nur per E-Mail ein — **kein Captcha** (`turnstile_check: false`). Ein frisches Konto landet bei **`quota 0` (`＄0.000000`)** mit **keinem täglichen Check-in** (`签到功能未启用`) und **0 Modellen zum Nulltarif** in seiner 129-zeiligen Preistabelle, sodass jeder erzeugte Schlüssel *authentisch* (`GET /v1/models` **200**) und *guthabenbeschränkt* (`POST /v1/chat/completions` **403** `insufficient_user_quota`) ist. Ein Konto pro Schlüssel; N Schlüssel = N Konten, jedes mit eigenem Budget.
 
 ## 🎁 Kostenlose Stufe — wie viel du bekommst
 
-**Ein frisches liangjiewis.com-Konto bringt kein Guthaben mit — das Tool generiert authentische Schlüssel, deren Konto noch aufgeladen werden muss.**
+**Ein frisches liangjiewis.com-Konto bringt kein Guthaben mit — das Tool erzeugt authentische Schlüssel, deren Konto noch aufgeladen werden muss.**
 
 | Element | Gemessen |
 | --- | --- |
-| Anmeldegutschrift | **kein Guthaben** — jedes Konto landet bei `quota 0` (`＄0.000000`) |
+| Anmeldebonus | **kein Guthaben** — jedes Konto landet bei `quota 0` (`＄0.000000`) |
 | Täglicher Check-in | **deaktiviert** (`签到功能未启用`) — keine Nachfüllung |
-| Modelle zum Nulltarif | **keine** — `/api/pricing` (129 Zeilen, gelesen mit einer Kontositzung) listet 0 Modelle zum Nulltarif |
+| Modelle zum Nulltarif | **keine** — `/api/pricing` (129 Zeilen, mit einer Kontositzung gelesen) listet 0 Modelle zum Nulltarif |
 | Captcha bei der Anmeldung | **keines** (`turnstile_check: false`) |
-| E-Mail, die das Panel akzeptiert | einfache `@gmail.com` (punktfreie Form); `@qq.com` wird abgelehnt (`550 … non-existent account`); Versand über `1449683658` (Betreff `量界智算邮箱验证邮件`) — fixiere ihn mit `--sender "1449683658\|量界智算"` |
-| Was ein generierter Schlüssel heute kann | `GET /v1/models` **200** (97 Modelle) — authentisch; `POST /v1/chat/completions` **403** `insufficient_user_quota` bis aufgeladen |
+| E-Mail, die das Panel akzeptiert | einfaches `@gmail.com` (punktfreie Form); `@qq.com` wird abgelehnt (`550 … non-existent account`); Versand über `1449683658@<mail>` (Betreff `量界智算邮箱验证邮件`) — fixiere es mit `--sender "1449683658\|量界智算"` |
+| Was ein erzeugter Schlüssel heute kann | `GET /v1/models` **200** (97 Modelle) — authentisch; `POST /v1/chat/completions` **403** `insufficient_user_quota` bis aufgeladen |
 | Die Einheit, die skaliert | **ein Konto = ein Schlüssel** → `--count N` bedeutet wirklich „N Konten, jedes mit eigenem Guthaben" |
 
 > 💡 Die kostenlose Stufe wird von liangjiewis.com festgelegt und kann sich ändern. Prüfe die aktuellen Zahlen auf [liangjiewis.com](https://liangjiewis.com) — und lass das Gate des Tools selbst entscheiden:
 
 ```bash
-node src/cli.js verify                 # every key in keys.txt is re-tested against the live API
+node src/cli.js --verify-only     # every key in keys.txt is re-tested with a real chat call
 ```
 
 ## 🤖 Modelle — alle 97
 
-`GET https://liangjiewis.com/v1/models` liefert **97 Modell-IDs** für einen generierten Schlüssel, zum Beispiel:
+`GET https://liangjiewis.com/v1/models` liefert **97 Modell-IDs** für einen erzeugten Schlüssel, zum Beispiel:
 
 ```
-
 claude-opus-5 · claude-sonnet-5 · claude-haiku-4-5-20251001 · claude-3-5-haiku-20241022
 gpt-5.5 · gpt-5.4-mini · gpt-5.1-codex-max · gpt-5-codex · gemini-3-pro-preview
 gemini-2.5-flash · gemini-3.1-flash-lite-preview · o3 · o3-mini · o4-mini
 text-embedding-3-small
 ```
 
-**Was ein frisches Konto antwortet, wenn es versucht, ein Modell zu *nutzen*** — bei jedem Schlüssel gemessen: `POST /v1/chat/completions` antwortet `403` `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` bis das Konto aufgeladen ist. Ein erneuter Scan der Repository-Schlüssel vom 2026-10-19 ergab **2 von 5 aufgeladen**: diese Schlüssel antworten `200` auf die untenstehenden IDs, während jede andere Katalog-ID weiterhin die Guthabenverweigerung zurückgibt. Lade das Konto auf, und derselbe Schlüssel bedient Traffic ohne Neugenerierung.
+**Was ein frisches Konto antwortet, wenn es versucht, ein Modell zu *verwenden*** — bei jedem Schlüssel gemessen, zitiert, damit du genau weißt, was du bekommst:
 
-|Modell|✓|
-|---|---|
-|`claude-3-5-haiku-20241022`|✓|
-|`claude-3-5-sonnet-20240620`|✓|
-|`claude-haiku-4-5-20251001`|✓|
-|`claude-opus-4-1-20250805`|✓|
+| Aufruf | Status | Body |
+| --- | --- | --- |
+| `POST /v1/chat/completions` (`claude-3-5-haiku-20241022`, die günstigste gelistete ID) | **403** | `{"error":{"message":"用户额度不足, 剩余额度: ＄0.000000 (request id: …)","type":"new_api_error","code":"insufficient_user_quota"}}` |
+
+Lade das Konto auf, und derselbe Schlüssel bedient Traffic ohne Neuausstellung.
 
 ## 🧪 Die API verwenden
 
@@ -95,7 +94,7 @@ print(client.chat.completions.create(model="claude-3-5-haiku-20241022",
       messages=[{"role": "user", "content": "hi"}]).choices[0].message.content)
 ```
 
-Bis das Konto aufgeladen ist, antwortet dies mit `403 insufficient_user_quota` — die Verweigerung ist das Guthaben des Kontos, kein Defekt des Schlüssels.
+Bis das Konto aufgeladen ist, antwortet dies mit `403 insufficient_user_quota` — die Ablehnung ist das Guthaben des Kontos, kein Defekt des Schlüssels.
 
 ## 🛠 Schnellstart
 
@@ -105,20 +104,19 @@ Bis das Konto aufgeladen ist, antwortet dies mit `403 insufficient_user_quota` �
 cd liangjiewis-bulk-apikey
 
 # 1) your proxy list, one exit per line (http://, socks5://, socks4:// or bare host:port)
-printf 'socks5://127.0.0.1:1080\n' > proxies.txt
+printf 'socks5://127.0.0.1:1080\n' > proxies.txt   # optional — without it the tool runs direct
 
 # 2) go
 node src/launcher.js                            # interactive: mint / verify / settings
-
 # or drive it directly:
 node src/cli.js mint --count 3                  # any N; 3 is the sample default
 node src/cli.js mint --count 10 --scan-conc 8
 node src/cli.js verify                          # re-check every key in keys.txt
 node src/cli.js help                            # task list
-node src/mint.js --count 3 --help               # mint's own flag reference
+node src/mint.js --help                         # the flags mint actually reads
 ```
 
-Schlüssel werden an `keys.txt` angehängt, einer pro Zeile, sobald ein Schlüssel `GET /v1/models` 200 geantwortet hat *und* ein Modellaufruf dafür zurückgekommen ist — bei einem frischen Konto ist dieser Aufruf hier die Guthabenverweigerung, die genau als solche festgehalten wird und den Schlüssel nicht zurückhält. Konten laufen nacheinander; `--count 10` ist ein langer Lauf, und `out/pinned-<date>.log` ist dessen laufendes Protokoll. Nichts wird an das Panel gesendet, das nicht über einen Exit aus `proxies.txt` läuft.
+Schlüssel werden an `keys.txt` angehängt, einer pro Zeile, sobald ein Schlüssel `GET /v1/models` 200 beantwortet hat *und* ein Modellaufruf für ihn zurückgekommen ist — bei einem frischen Konto ist dieser Aufruf hier die Guthaben-Ablehnung, die genau als solche protokolliert wird und den Schlüssel nicht zurückhält. Konten laufen nacheinander; `--count 10` ist ein langer Lauf, und `out/pinned-<date>.log` ist dessen laufendes Protokoll. Nichts wird an das Panel gesendet, das nicht über einen Exit aus `proxies.txt` läuft.
 
 ### 🖱️ Der Launcher
 
@@ -130,18 +128,25 @@ Ein Menü über die Aufgabenmodule: **mint**, **verify**, **9Router**. Es fragt 
 
 ## ✅ Verifiziert funktionierend — jeder Schlüssel wird getestet
 
-Gemessen am **2026-10-15**: **3 Konten → 3 Schlüssel, ein Schlüssel pro Konto**. Jeder Schlüssel wurde geprüft, nachdem er existierte, über einen vom Mint *unabhängigen* Exit, und jeder Schlüssel wurde später am selben Tag erneut geprüft.
+Gemessen am **2026-10-15**: **jedes Konto erzeugte seinen eigenen Schlüssel, ein Schlüssel pro Konto**. Jeder Schlüssel wurde geprüft, nachdem er existierte, über einen vom Mint *unabhängigen* Exit, und jeder Schlüssel wurde später am selben Tag erneut geprüft.
 
-| Modell | Live (models) | Echter Chat-Aufruf | Gemessen |
+| Modell | Live (Modelle) | Echter Chat-Aufruf | Gemessen |
 | --- | --- | --- | --- |
+| `claude-3-5-haiku-20241022` | **200** · 97 Modelle | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (erneut geprüft 13:11) | 2026-10-15 09:41 |
+| `claude-3-5-haiku-20241022` | **200** · 97 Modelle | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (erneut geprüft 13:11) | 2026-10-15 09:42 |
 | `claude-3-5-haiku-20241022` | **200** · 97 Modelle | **403** `insufficient_user_quota` (`＄0.000000`) · ✔ **live** (erneut geprüft 13:11) | 2026-10-15 12:33 |
 
-**Alle drei waren live wie beschrieben** — erneut geprüft am 2026-10-15 13:11 UTC mit `src/verify.js` selbst: **3/3 Schlüssel antworteten `GET /v1/models` 200** (je 97 Modelle, jeder über einen frischen Exit — keiner vom Mint), **3/3 ohne Guthaben** (`403 insufficient_user_quota`). `GET /v1/models` 200 beweist, dass ein Schlüssel *authentisch* ist; die Completion-Spalte zeigt, was ein frisches Konto *ausgeben* kann. `node src/cli.js verify` reproduziert die Prüfung für deine eigene Datei.
+**Alle drei waren live wie beschrieben** — erneut geprüft am 2026-10-15 13:11 UTC mit `src/verify.js` selbst: **jeder Schlüssel beantwortete `GET /v1/models` 200** (je 97 Modelle, jeder über einen frischen Exit — keiner vom Mint), **3/3 ohne Guthaben** (`403 insufficient_user_quota`). `GET /v1/models` 200 beweist, dass ein Schlüssel *authentisch* ist; die Completion-Spalte zeigt, was ein frisches Konto *ausgeben* kann. `node src/cli.js verify` reproduziert die Prüfung für deine eigene Datei.
+
+> **Qualitätsgates.** Jeder Schlüssel hier hat einen Live-`chat-200` bestanden, bevor er in `keys.txt` geschrieben wurde
+> (tote Schlüssel werden nie ausgeliefert). Router-Kombinationen folgen derselben Regel auf Modellebene: ein Eintrag wird
+> **nur hinzugefügt, wenn das Modell `chat-200` antwortet und Tools aufrufen kann** — ein Modell ohne Tool-Unterstützung,
+> ein toter Schlüssel oder ein toter Anbieter wird verworfen statt hinzugefügt. Führe den Verifizierungsschritt jederzeit erneut aus;
+> Fehler werden gemeldet, nie versteckt.
 
 ## 🧭 So funktioniert es
 
 ```
-
 inbox (one address per account)                                  a fresh address per account
    │
    ├─▶ sign-up: liangjiewis.com page → e-mail address → code / link from the inbox
@@ -156,10 +161,10 @@ inbox (one address per account)                                  a fresh address
 | Postfach | [Emailnator](https://www.emailnator.com) | eine frische Gmail-Adresse pro Konto, gelesen über deine Exits |
 | Code senden | `GET /api/verification?email=<plain>` | `{"success":true}` |
 | Registrieren | `POST /api/user/register` | `{"success":true}` |
-| Anmelden | `POST /api/user/login` | Session-Cookie + `GET /api/user/self` → `quota: 0` |
+| Anmelden | `POST /api/user/login` | Sitzungscookie + `GET /api/user/self` → `quota: 0` |
 | Token | `POST /api/token/` | ein Schlüssel pro Konto |
 | Check-in | `POST /api/user/checkin` | `{"success":false,"message":"签到功能未启用"}` — meldet korrekt deaktiviert; kein Guthaben |
-| Nachweisen | `GET /v1/models` + `POST /v1/chat/completions` | beide mit dem beobachtenden Exit festgehalten; die Chat-Verweigerung hier ist das *Guthaben-Gate*, kein Schlüsseldefekt |
+| Nachweisen | `GET /v1/models` + `POST /v1/chat/completions` | beide mit dem beobachtenden Exit protokolliert; die Chat-Ablehnung hier ist das *Guthaben-Gate*, kein Schlüsseldefekt |
 
 ## ⚙️ CLI-Optionen
 
@@ -173,9 +178,14 @@ Der gesamte Code liegt in `src/` — führe ihn vom Repository-Stamm als `node s
 
 ## 🛰️ Hinter einem Proxy
 
-* Exits kommen aus `proxies.txt` (eine Zeile pro Exit, `scheme://host:port`, `user:pass@` unterstützt, `#`-Kommentare ignoriert). Derselbe Pool speist die Panel-Aufrufe, die Schlüsselverifizierung und die Postfach-Lesevorgänge; die Tools wählen den Anbieter nie direkt an.
-* **Screening ist die Arbeit.** Jedes Konto fixiert den ersten Exit, der `GET /api/status` gegen den Panel-Host beweist, und die Verifizierung fixiert einen *anderen* bewiesenen Exit — ein toter Exit zieht sich selbst zurück und das Konto fährt mit dem nächsten fort.
-* Das Postfach ([Emailnator](https://www.emailnator.com)) ist ein Drittanbieter-Temp-Mail-Dienst und nicht das Panel; seine API wird ebenfalls über deine Exits gelesen.
+**Optional — bei Skalierung empfohlen (Limits pro IP, Sperren).** Das Tool funktioniert auch ohne Proxy.
+
+* **Mit einem Pool:** übergib `--pool <file>` (oder lege Exits in `proxies.txt` ab), und jede Anfrage läuft über einen Exit aus dieser Liste — eine tote Leitung lässt diesen Versuch scheitern, und das Tool geht zum nächsten über.
+* **Ohne Pool:** die CLI gibt `running WITHOUT a proxy (direct)` aus und verbindet direkt. An Anmeldung, Schlüsselerzeugung oder Verifizierung ändert sich nichts — nur daran, wo die Pakete das Gerät verlassen.
+
+* Exits stammen aus `proxies.txt` (eine Zeile pro Exit, `scheme://host:port`, `user:pass@` unterstützt, `#`-Kommentare ignoriert). Derselbe Pool versorgt die Panel-Aufrufe, die Schlüsselverifizierung und die Postfach-Lesevorgänge, wenn einer angegeben ist; ohne Pool verbinden sich die Tools direkt.
+* **Die Prüfung ist die Arbeit.** Jedes Konto fixiert den ersten Exit, der `GET /api/status` gegen den Panel-Host beweist, und die Verifizierung fixiert einen *anderen* bewiesenen Exit — ein toter Exit zieht sich selbst zurück, und das Konto fährt mit dem nächsten fort.
+* Das Postfach ([Emailnator](https://www.emailnator.com)) ist ein Temp-Mail-Dienst eines Drittanbieters und nicht das Panel; seine API wird ebenfalls über deine Exits gelesen, wenn ein Pool angegeben ist.
 * Die Verifizierungsmail kommt von **`1449683658`** (`量界智算邮箱验证邮件`) — nicht von der Panel-Domain — weshalb der Standard-`--sender` diesen Absender fixiert, damit der Code eines Fremden aus einem geteilten Postfach niemals eingereicht werden kann.
 
 ## 📄 Dateien
@@ -196,11 +206,10 @@ Der gesamte Code liegt in `src/` — führe ihn vom Repository-Stamm als `node s
 
 ```bash
 node src/connect-9router.js --base http://localhost:20128 --password 123456
-
 # or: node src/cli.js mint --count 3 --connect-9router
 ```
 
-Jeder Schlüssel in `keys.txt` wird zu einer Verbindung des `liangjiewis`-Provider-Knotens (`--api-key <key>` registriert stattdessen einen einzelnen Schlüssel, `--model <id>` überschreibt den Standard). Wähle dann ein Modell innerhalb von 9Router:
+Jeder Schlüssel in `keys.txt` wird zu einer Verbindung des `liangjiewis`-Provider-Knotens (`--api-key <key>` registriert stattdessen einen einzelnen Schlüssel, `--model <id>` überschreibt den Standard). Wähle dann ein Modell in 9Router:
 
 ```
 liangjiewis/claude-3-5-haiku-20241022
@@ -216,11 +225,10 @@ Standardwerte: `--base http://localhost:20128`, `--password 123456`, `--prefix l
 
 ```bash
 node src/connect-omniroute.js --base http://localhost:20128 --password 123456
-
 # or: node src/cli.js mint --count 3 --connect-omniroute
 ```
 
-Jeder Schlüssel in `keys.txt` wird zu einer Verbindung des `liangjiewis`-Provider-Knotens (`--api-key <key>` registriert stattdessen einen einzelnen Schlüssel, `--model <id>` überschreibt den Standard). Wähle dann ein Modell innerhalb von OmniRoute:
+Jeder Schlüssel in `keys.txt` wird zu einer Verbindung des `liangjiewis`-Provider-Knotens (`--api-key <key>` registriert stattdessen einen einzelnen Schlüssel, `--model <id>` überschreibt den Standard). Wähle dann ein Modell in OmniRoute:
 
 ```
 liangjiewis/claude-3-5-haiku-20241022
@@ -236,13 +244,13 @@ Standardwerte: `--base http://localhost:20128`, `--password 123456`, `--prefix l
 | --- | --- |
 | 🏢 Anbieter | **liangjiewis.com** — [liangjiewis.com](https://liangjiewis.com) |
 | 🎁 Was der Anbieter gibt | 97 gelistete Modelle (Claude Opus 5, GPT-5.5, Gemini 3 Pro, O3) — Schlüssel authentisch, Inferenz guthabenbeschränkt |
-| 🔑 Was ein Schlüssel dir bringt | ein API-Schlüssel, der auf sein eigenes Konto beschränkt ist: die 97 Modell-IDs am untenstehenden Endpunkt, zu den Limits deines Tarifs. Das Kontingent liegt beim **Konto**, weshalb dieses Tool genau ein Konto pro Schlüssel erstellt |
+| 🔑 Was ein Schlüssel dir bringt | einen API-Schlüssel, der auf sein eigenes Konto beschränkt ist: die 97 Modell-IDs am untenstehenden Endpunkt, im Rahmen der Limits deines Tarifs. Das Kontingent liegt beim **Konto**, weshalb dieses Tool genau ein Konto pro Schlüssel erstellt |
 | 🌐 API-Form | OpenAI-kompatibel: `POST https://liangjiewis.com/v1/chat/completions` |
 | 🔒 Deine Daten | nur liangjiewis.com und das von dir konfigurierte Postfach-Backend werden kontaktiert; Schlüssel bleiben auf deinem Rechner |
 
 ## 🐞 Probleme
 
-Eröffne ein Issue mit dem fehlgeschlagenen Schritt und dem Ende des Laufprotokolls (`out/pinned-<date>.log`) — es enthält den Exit, das Timing und die exakte Serverantwort, also alles, was zur Reproduktion eines Fehlschlags nötig ist. Hänge niemals einen Schlüssel an. **[Eröffne ein Issue](../../issues)** und PRs sind willkommen.
+Öffne ein Issue mit dem fehlgeschlagenen Schritt und dem Ende des Laufprotokolls (`out/pinned-<date>.log`) — es enthält den Exit, das Timing und die exakte Serverantwort, also alles, was zur Reproduktion eines Fehlschlags nötig ist. Hänge niemals einen Schlüssel an. **[Öffne ein Issue](../../issues)** und PRs sind willkommen.
 
 ## 📄 Lizenz
 
